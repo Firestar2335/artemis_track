@@ -18,10 +18,10 @@ public class UserInterface implements Runnable {
 
 	private final BlockingQueue<ApiResponse> recv;
 
-	public UserInterface(String objectURL, long millisecondsPerUpdate, long webRequestTimer, TimeUnit unit) {
+	public UserInterface(String objectURL, long millisecondsPerUpdate, boolean makeLogFiles, long webRequestTimer, TimeUnit unit) {
 		milliDelay = millisecondsPerUpdate;
 		recv = new ArrayBlockingQueue<>(1);
-		webRequests = new DataRequester(objectURL, recv, Thread.currentThread(), webRequestTimer, unit);
+		webRequests = new DataRequester(objectURL, recv, Thread.currentThread(), makeLogFiles, webRequestTimer, unit);
 	}
 
 	public void run() {

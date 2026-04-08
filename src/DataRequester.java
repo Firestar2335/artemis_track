@@ -7,9 +7,6 @@ import JSON.*;
 
 
 public class DataRequester implements Runnable {
-	private static final boolean LOG = true;
-
-
 	/** The google api storage url to retrieve from */
 	private final String URL; //"https://storage.googleapis.com/storage/v1/b/p-2-cen1/o/October%2F1%2FOctober_105_1.txt";
 	/** The most recent generation that was retrieved */
@@ -28,7 +25,9 @@ public class DataRequester implements Runnable {
 
 	private volatile int httpCode;
 
-	public DataRequester(String URL, BlockingQueue<ApiResponse> recv, Thread parent, long delayMilli, int delayNano) {
+	private boolean log;
+
+	public DataRequester(String URL, BlockingQueue<ApiResponse> recv, Thread parent, boolean makeLogFiles, long delayMilli, int delayNano) {
 		int k = Math.floorDiv(delayNano, 1_000_000);
 		if (k > 0 && delayMilli > Long.MAX_VALUE - k) {
 			k = (int)(Long.MAX_VALUE - delayMilli);
@@ -57,13 +56,14 @@ public class DataRequester implements Runnable {
 		lastGeneration = 0;
 		this.parent = parent;
 		httpCode = 200;
+		log = makeLogFiles;
 	}
 
-	public DataRequester(String URL, BlockingQueue<ApiResponse> recv, Thread parent, long delayMilli) {
-		this(URL, recv, parent, delayMilli, 0);
+	public DataRequester(String URL, BlockingQueue<ApiResponse> recv, Thread parent, boolean makeLogFiles, long delayMilli) {
+		this(URL, recv, parent, makeLogFiles, delayMilli, 0);
 	}
 
-	public DataRequester(String URL, BlockingQueue<ApiResponse> recv, Thread parent, long timeout, TimeUnit unit) {
+	public DataRequester(String URL, BlockingQueue<ApiResponse> recv, Thread parent, boolean makeLogFiles, long timeout, TimeUnit unit) {
 		if (timeout <= 0) {
 			throw new IllegalArgumentException("Timeout was not positive");
 		}
@@ -91,7 +91,7 @@ public class DataRequester implements Runnable {
 					nano = 0;
 				}
 		}
-		this(URL, recv, parent, milli, nano);
+		this(URL, recv, parent, makeLogFiles, milli, nano);
 	}
 
 	public void run() {
@@ -109,7 +109,7 @@ public class DataRequester implements Runnable {
 					verifyCode();
 					if (httpCode != 304) {
 						JsonDocument newData = parseJSON(dataResponse);
-						if (LOG) {
+						if (log) {
 							logJSON(newData,gen);
 						}
 						snd.put(parseData(newData, gen));

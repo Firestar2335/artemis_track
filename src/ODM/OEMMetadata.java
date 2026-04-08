@@ -48,7 +48,6 @@ public class OEMMetadata extends BaseMetadata {
 		s.next("META_STOP");
 	}
 
-	@SuppressWarnings("unused")
 	public String getString(String key) {
 		switch (key) {
 			case "startTime": return startTime.toString();
@@ -77,7 +76,6 @@ public class OEMMetadata extends BaseMetadata {
 		return super.getString(key);
 	}
 
-	@SuppressWarnings("unused")
 	public int getInt(String key) {
 		switch (key) {
 			case "interpolationDegree":
@@ -106,7 +104,6 @@ public class OEMMetadata extends BaseMetadata {
 		return super.getInt(key);
 	}
 
-	@SuppressWarnings("unused")
 	public double getDouble(String key) {
 		switch (key) {
 			case "interpolationDegree":
@@ -135,7 +132,6 @@ public class OEMMetadata extends BaseMetadata {
 		return super.getInt(key);
 	}
 
-	@SuppressWarnings("unused")
 	public Temporal getDate(String key) {
 		switch (key) {
 			case "startTime": return startTime;
@@ -164,7 +160,6 @@ public class OEMMetadata extends BaseMetadata {
 		return super.getDate(key);
 	}
 
-	@SuppressWarnings("unused")
 	public Set<String> getKeys() {
 		Set<String> keys = super.getKeys();
 		keys.add("startTime");

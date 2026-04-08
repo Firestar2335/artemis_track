@@ -105,7 +105,6 @@ public class BaseMetadata implements Metadata {
 		throw new NoSuchElementException("Invalid key");
 	}
 
-	@SuppressWarnings("unused")
 	public Set<String> getKeys() {
 		Set<String> result = new TreeSet<>(MANDATORY_KEYS);
 		if (!STRICTACCESS || comment != null) {
