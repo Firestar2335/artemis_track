@@ -112,9 +112,14 @@ public class DataRequester implements Runnable {
 						if (log) {
 							logJSON(newData,gen);
 						}
-						snd.put(parseData(newData, gen));
-						lastGeneration = gen;
-						parent.interrupt();
+						try {// (newData.getRoot().getObject("File").get("Type").getIntValue() == 4) {
+							snd.put(parseData(newData, gen));
+							lastGeneration = gen;
+							parent.interrupt();
+						}
+						catch (NoSuchElementException e) {
+							System.err.println("Malformed JSON telemetry received at generation "+gen);
+						}
 					}
 				}
 				Thread.sleep(delayMilli, delayNano);

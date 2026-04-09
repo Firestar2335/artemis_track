@@ -1,6 +1,6 @@
 import java.time.*;
 import java.util.concurrent.*;
-import java.util.Scanner;
+import java.util.*;
 import java.io.IOException;
 import ODM.*;
 
@@ -66,8 +66,13 @@ public class UserInterface implements Runnable {
 					next = recv.poll();
 					if (next != null) {
 						lastData = next;
-						lastVectors = getVectors(lastData);
-						lastElements = KeplerElements.fromStateVector(lastVectors, EARTH_GRAV_PARAM);
+						try {
+							lastVectors = getVectors(lastData);
+							lastElements = KeplerElements.fromStateVector(lastVectors, EARTH_GRAV_PARAM);
+						} catch (NoSuchElementException f) {
+							System.err.println("Invalid JSON telemetry received at generation "+lastData.genMicro);
+							next = null;
+						}
 					}
 					else if (System.in.available() > 0 && in.nextLine().equalsIgnoreCase("quit")) {
 						break;

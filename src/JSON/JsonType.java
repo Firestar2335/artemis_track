@@ -28,6 +28,10 @@ public abstract class JsonType {
 		throw new UnsupportedOperationException();
 	}
 
+	public JsonObject getObject(String key) {
+		throw new UnsupportedOperationException();
+	}
+
 	public int getIntValue() {
 		throw new UnsupportedOperationException();
 	}
