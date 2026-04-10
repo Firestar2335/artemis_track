@@ -169,7 +169,7 @@ public class UserInterface implements Runnable {
 	}
 
 	public static String formatAngles(EulerAngles angs) {
-		return String.format("Yaw: %f°%nPitch: %f°%nRoll: %f°",Math.toDegrees(angs.yaw),Math.toDegrees(angs.pitch),Math.toDegrees(angs.roll));
+		return angs == null ? "" : String.format("Yaw: %f°%nPitch: %f°%nRoll: %f°",Math.toDegrees(angs.yaw),Math.toDegrees(angs.pitch),Math.toDegrees(angs.roll));
 	}
 
 	private void printAngles(EulerAngles angs) {
