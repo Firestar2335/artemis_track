@@ -245,11 +245,11 @@ public class UserInterface implements Runnable {
 		result.append(elems.anom);
 		result.append("°\nStandard gravitational parameter (\u03bc): ");
 		result.append(elems.gm);
-		result.append("km³/s²\n\nApoapsis: ");
+		result.append(" km³/s²\n\nApoapsis: ");
 		result.append(elems.getApoapsis());
-		result.append("km\nPeriapsis: ");
+		result.append(" km\nPeriapsis: ");
 		result.append(elems.getPeriapsis());
-		result.append("km");
+		result.append(" km");
 		return result.toString();
 	}
 

@@ -48,10 +48,10 @@ public class Client {
 
 		boolean gui = DEFAULT_GUI;
 		if (args.length >= 3) {
-			if (args[3].equalsIgnoreCase("true")) {
+			if (args[2].equalsIgnoreCase("true")) {
 				gui = true;
 			}
-			else if (args[1].equalsIgnoreCase("false")) {
+			else if (args[2].equalsIgnoreCase("false")) {
 				gui = false;
 			}
 		}
