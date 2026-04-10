@@ -18,10 +18,24 @@ public class UserInterface implements Runnable {
 
 	private final BlockingQueue<ApiResponse> recv;
 
-	public UserInterface(String objectURL, long millisecondsPerUpdate, boolean makeLogFiles, long webRequestTimer, TimeUnit unit) {
+	private boolean quit;
+
+	private final Thread thisThread;
+
+	private final GUI gui;
+
+	public UserInterface(String objectURL, long millisecondsPerUpdate, boolean makeLogFiles, boolean useGUI, long webRequestTimer, TimeUnit unit) {
+		thisThread = Thread.currentThread();
 		milliDelay = millisecondsPerUpdate;
 		recv = new ArrayBlockingQueue<>(1);
-		webRequests = new DataRequester(objectURL, recv, Thread.currentThread(), makeLogFiles, webRequestTimer, unit);
+		webRequests = new DataRequester(objectURL, recv, thisThread, makeLogFiles, webRequestTimer, unit);
+		quit = false;
+		if (useGUI) {
+			gui = new GUI(this);
+		}
+		else {
+			gui = null;
+		}
 	}
 
 	public void run() {
@@ -35,6 +49,7 @@ public class UserInterface implements Runnable {
 		ApiResponse lastData = null;
 		StateVector lastVectors = null;
 		KeplerElements lastElements = null;
+		EulerAngles lastAngles = null;
 		try {
 			while (true) {
 				try {
@@ -44,11 +59,18 @@ public class UserInterface implements Runnable {
 					}
 					else if (next != null) {
 						next = null;
-						System.out.println();System.out.println();System.out.println();
-						System.out.println("Latest data:");
-						printVectors(lastVectors);
-						System.out.println();
-						printElements(lastElements);
+						if (gui == null) {
+							System.out.println();System.out.println();System.out.println();
+							System.out.println("Latest data:");
+							printVectors(lastVectors);
+							System.out.println();
+							printElements(lastElements);
+							System.out.println();
+							printAngles(lastAngles);
+						}
+						else {
+							gui.updateCurrentTelemetry(lastVectors, lastElements, lastAngles);
+						}
 					}
 					else {
 						System.out.println("\nNo new data");
@@ -62,6 +84,9 @@ public class UserInterface implements Runnable {
 					Thread.sleep(milliDelay);
 				}
 				catch (InterruptedException e) {
+					if (quit) {
+						break;
+					}
 					cycles = 0;
 					next = recv.poll();
 					if (next != null) {
@@ -69,6 +94,7 @@ public class UserInterface implements Runnable {
 						try {
 							lastVectors = getVectors(lastData);
 							lastElements = KeplerElements.fromStateVector(lastVectors, EARTH_GRAV_PARAM);
+							lastAngles = getEulerAngles(lastData);
 						} catch (NoSuchElementException f) {
 							System.err.println("Invalid JSON telemetry received at generation "+lastData.genMicro);
 							next = null;
@@ -93,9 +119,9 @@ public class UserInterface implements Runnable {
 		}
 		finally {
 			System.out.println("Exiting...");
+			requests.interrupt();
 			recv.clear();
 			in.close();
-			requests.interrupt();
 		}
 	}
 
@@ -121,14 +147,62 @@ public class UserInterface implements Runnable {
 		return new StateVector(epoch,pos,vel,acc,null);
 	}
 
+	private EulerAngles getEulerAngles(ApiResponse data) {
+		try {
+			double r = data.getFromID(2012).getValueDouble();
+			double i = data.getFromID(2013).getValueDouble();
+			double j = data.getFromID(2014).getValueDouble();
+			double k = data.getFromID(2015).getValueDouble();
+
+			Quaternion state = new Quaternion(r,i,j,k);
+			return state.toEulerAngles();
+		}
+		catch (NoSuchElementException e) {
+			return null;
+		}
+	}
+
 	private void wasInterrupted() throws InterruptedException {
 		if (Thread.interrupted()) {
 			throw new InterruptedException();
 		}
 	}
 
+	public static String formatAngles(EulerAngles angs) {
+		return String.format("Yaw: %f°%nPitch: %f°%nRoll: %f°",Math.toDegrees(angs.yaw),Math.toDegrees(angs.pitch),Math.toDegrees(angs.roll));
+	}
+
+	private void printAngles(EulerAngles angs) {
+		System.out.println(formatAngles(angs));
+	}
+
+	public static String formatVectors(StateVector vecs) {
+		StringBuilder result = new StringBuilder("Epoch of latest data: ");
+		result.append(vecs.epoch);
+		result.append("\nPosition vector: ");
+		result.append(vecs.pos);
+		result.append(" km\nDistance from center: ");
+		result.append(vecs.pos.mag());
+		result.append(" km\nVelocity vector: ");
+		result.append(vecs.vel);
+		result.append(" km/s\nSpeed: ");
+		result.append(vecs.vel.mag());
+		result.append(" km/s");
+		if (vecs.acc != null) {
+			result.append("\nAcceleration vector: ");
+			result.append(vecs.acc);
+			result.append(" km/s²\nMagnitude of acceleration: ");
+			result.append(vecs.acc.mag());
+			result.append(" km/s²\nCurvature: ");
+			result.append(vecs.vel.cross(vecs.acc).mag()/Math.pow(vecs.vel.mag(),3));
+			result.append(" km\u207B¹");
+		}
+		return result.toString();
+	}
+
 	private void printVectors(StateVector vecs) {
-		System.out.print("Epoch of latest data: ");
+		System.out.println(formatVectors(vecs));
+		/*System.out.print("Epoch of latest data: ");
 		System.out.println(vecs.epoch);
 		System.out.print("Position vector: ");
 		System.out.print(vecs.pos);
@@ -147,11 +221,41 @@ public class UserInterface implements Runnable {
 			System.out.print(" km/s²\nCurvature: ");
 			System.out.print(vecs.vel.cross(vecs.acc).mag()/Math.pow(vecs.vel.mag(),3));
 			System.out.println(" km\u207B¹");
+		}*/
+	}
+
+	public static String formatElements(KeplerElements elems) {
+		StringBuilder result = new StringBuilder("Semi-major axis (a): ");
+		result.append(elems.sma);
+		result.append(" km\nEccentricity (e): ");
+		result.append(elems.ecc);
+		result.append("\nInclination (i): ");
+		result.append(elems.inc);
+		result.append("°\nLongitude of ascending node (\u03a9): ");
+		result.append(elems.raan);
+		result.append("°\nArgument of periapsis (\u03c9): ");
+		result.append(elems.arg);
+		result.append("°\n");
+		if (elems.isTrueAnomaly) {
+			result.append("True anomaly (\u03bd): ");
 		}
+		else {
+			result.append("Mean anomaly (M): ");
+		}
+		result.append(elems.anom);
+		result.append("°\nStandard gravitational parameter (\u03bc): ");
+		result.append(elems.gm);
+		result.append("km³/s²\n\nApoapsis: ");
+		result.append(elems.getApoapsis());
+		result.append("km\nPeriapsis: ");
+		result.append(elems.getPeriapsis());
+		result.append("km");
+		return result.toString();
 	}
 
 	private void printElements(KeplerElements elems) {
-		System.out.print("Semi-major axis (a): ");
+		System.out.println(formatElements(elems));
+		/*System.out.print("Semi-major axis (a): ");
 		System.out.print(elems.sma);
 		System.out.print(" km\nEccentricity (e): ");
 		System.out.println(elems.ecc);
@@ -176,6 +280,14 @@ public class UserInterface implements Runnable {
 		System.out.print(elems.getApoapsis());
 		System.out.print("km\nPeriapsis: ");
 		System.out.print(elems.getPeriapsis());
-		System.out.println("km");
+		System.out.println("km");*/
+	}
+
+	/**
+	 * Quits the program
+	 */
+	public void quit() {
+		quit = true;
+		thisThread.interrupt();
 	}
 }

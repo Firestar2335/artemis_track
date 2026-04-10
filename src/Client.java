@@ -13,14 +13,18 @@ public class Client {
 	private static final long DEFAULT_DELAY = 65000;
 
 	private static final boolean DEFAULT_LOGGING = false;
+
+	private static final boolean DEFAULT_GUI = true;
 	/** Standard gravitational parameter of earth in km^3/s^2 */
 	public static final double EARTH_GRAV_PARAM = 3.986004418e5;
 
 	public static void main(String[] args) {
+		//GUI Gui = new GUI(null);
 		if (args.length == 0) {
-			System.out.println("Use: java -jar artemis_track.jar [updatePeriod] [logs]");
+			System.out.println("Use: java -jar artemis_track.jar [updatePeriod] [logs] [gui]");
 			System.out.println("\t-updatePeriod: Time in milliseconds to wait between printing data to the console. New data will always be printed immediately when received regardless of this option. Default: 65000");
 			System.out.println("\t-logs: Whether to save the received JSON files to the log folder. Default: false");
+			System.out.println("\t-gui: Whether to open and output data to a GUI. Default: true");
 			System.out.println("\nUsing default values for parameters.\n");
 		}
 		long delay = DEFAULT_DELAY;
@@ -41,7 +45,17 @@ public class Client {
 				log = false;
 			}
 		}
-		UserInterface ui = new UserInterface("https://storage.googleapis.com/storage/v1/b/p-2-cen1/o/October%2F1%2FOctober_105_1.txt", delay, log, 5, TimeUnit.SECONDS);
+
+		boolean gui = DEFAULT_GUI;
+		if (args.length >= 3) {
+			if (args[3].equalsIgnoreCase("true")) {
+				gui = true;
+			}
+			else if (args[1].equalsIgnoreCase("false")) {
+				gui = false;
+			}
+		}
+		UserInterface ui = new UserInterface("https://storage.googleapis.com/storage/v1/b/p-2-cen1/o/October%2F1%2FOctober_105_1.txt", delay, log, gui, 5, TimeUnit.SECONDS);
 		ui.run();
 		//File testJson = new File("C:\\Users\\thoma\\Documents\\artemisII\\october1.txt");
 		//JsonDocument doc = JsonDocument.read(testJson);
