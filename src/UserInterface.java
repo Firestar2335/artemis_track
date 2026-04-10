@@ -50,6 +50,7 @@ public class UserInterface implements Runnable {
 		StateVector lastVectors = null;
 		KeplerElements lastElements = null;
 		EulerAngles lastAngles = null;
+		Duration elapsedTime = null;
 		try {
 			while (true) {
 				try {
@@ -62,6 +63,7 @@ public class UserInterface implements Runnable {
 						if (gui == null) {
 							System.out.println();System.out.println();System.out.println();
 							System.out.println("Latest data:");
+							printDuration(elapsedTime);
 							printVectors(lastVectors);
 							System.out.println();
 							printElements(lastElements);
@@ -69,7 +71,7 @@ public class UserInterface implements Runnable {
 							printAngles(lastAngles);
 						}
 						else {
-							gui.updateCurrentTelemetry(lastVectors, lastElements, lastAngles);
+							gui.updateCurrentTelemetry(elapsedTime,lastVectors, lastElements, lastAngles);
 						}
 					}
 					else {
@@ -95,6 +97,7 @@ public class UserInterface implements Runnable {
 							lastVectors = getVectors(lastData);
 							lastElements = KeplerElements.fromStateVector(lastVectors, EARTH_GRAV_PARAM);
 							lastAngles = getEulerAngles(lastData);
+							elapsedTime = getDuration(lastData);
 						} catch (NoSuchElementException f) {
 							System.err.println("Invalid JSON telemetry received at generation "+lastData.genMicro);
 							next = null;
@@ -162,10 +165,60 @@ public class UserInterface implements Runnable {
 		}
 	}
 
+	private Duration getDuration(ApiResponse data) {
+		String time;
+		if (data.containsID(5001)) {
+			time = data.getFromID(5001).getValueString();
+		} else if (data.containsID(5016)) {
+			time = data.getFromID(5016).getValueString();
+		} else if (data.containsID(5017)) {
+			time = data.getFromID(5017).getValueString();
+		} else {
+			return null;
+		}
+		int decimalPoint = time.indexOf('.');
+		long seconds;
+		int nano;
+		if (decimalPoint == -1) {
+			seconds = Long.parseLong(time);
+			nano = 0;
+		} else {
+			seconds = Long.parseLong(time, 0, decimalPoint, 10);
+			int decimalDigits = time.length() - decimalPoint - 1;
+			time = time + "0".repeat(Math.max(9 - decimalDigits, 0));
+			nano = Integer.parseInt(time, decimalPoint + 1, decimalPoint + 10, 10);
+		}
+		return Duration.ofSeconds(seconds, nano);
+	}
+
 	private void wasInterrupted() throws InterruptedException {
 		if (Thread.interrupted()) {
 			throw new InterruptedException();
 		}
+	}
+
+	public static String formatDuration(Duration dur) {
+		if (dur == null) {
+			return "";
+		}
+		String format;
+		if (dur.toDays() > 0) {
+			format = "%1$d days, %2$d:%3$02d:%4$02d.%5$09d";
+		}
+		else if (dur.toHours() > 0) {
+			format = "%2$d:%3$02d:%4$02d.%5$09d";
+		}
+		else if (dur.toMinutes() > 0) {
+			format = "%3$d:%4$02d.%5$09d";
+		}
+		else {
+			format = "%4$d.%5$09d";
+		}
+		return "Elapsed time: " + String.format(format,dur.toDays(),dur.toHoursPart(),dur.toMinutesPart(),dur.toSecondsPart(),dur.toNanosPart());
+	}
+
+	private void printDuration(Duration dur) {
+		System.out.println(formatDuration(dur));
 	}
 
 	public static String formatAngles(EulerAngles angs) {

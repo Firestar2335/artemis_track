@@ -47,14 +47,32 @@ public class ApiResponse {
 	public Parameter getFromKey(String key) {
 		try {
 			if (key.startsWith(PREFIX)) {
-				return getFromID(Integer.parseInt(key, PREFIX.length(), key.length(), 10));
+				return getFromID(Integer.valueOf(key.substring(PREFIX.length())));
 			}
 			else {
-				return getFromID(Integer.parseInt(key));
+				return getFromID(Integer.valueOf(key));
 			}
 		}
 		catch (NumberFormatException e) {
 			throw new NoSuchElementException("There was not a parameter corresponding to the given key");
+		}
+	}
+
+	public boolean containsID(int num) {
+		return parameters.containsKey(num);
+	}
+
+	public boolean containsKey(String key) {
+		try {
+			if (key.startsWith(PREFIX)) {
+				return parameters.containsKey(Integer.valueOf(key.substring(PREFIX.length())));
+			}
+			else {
+				return parameters.containsKey(Integer.valueOf(key));
+			}
+		}
+		catch (NumberFormatException e) {
+			return false;
 		}
 	}
 

@@ -8,6 +8,8 @@ import java.awt.Color;
 import javax.swing.*;
 import javax.swing.text.*;
 
+import java.time.Duration;
+
 public class GUI {
 	private static final Color BACKGROUND = new Color(255,255,208);
 
@@ -36,7 +38,7 @@ public class GUI {
 		frame.setVisible(true);
 	}
 
-	public void updateCurrentTelemetry(StateVector vectors, KeplerElements elements, EulerAngles attitude) {
-		currentData.setText(UserInterface.formatVectors(vectors)+"\n\n"+UserInterface.formatElements(elements)+"\n\n"+UserInterface.formatAngles(attitude));
+	public void updateCurrentTelemetry(Duration elapsedTime,StateVector vectors, KeplerElements elements, EulerAngles attitude) {
+		currentData.setText(UserInterface.formatDuration(elapsedTime)+"\n"+UserInterface.formatVectors(vectors)+"\n\n"+UserInterface.formatElements(elements)+"\n\n"+UserInterface.formatAngles(attitude));
 	}
 }
