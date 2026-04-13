@@ -2,6 +2,8 @@ package ODM;
 
 import java.time.*;
 
+import ExtraMath.Vector3D;
+
 public class Segment {
 	public final OEMMetadata metadata;
 	public final EphemerisBlock ephemerides;

@@ -90,6 +90,25 @@ public class Matrix {
 	}
 
 	/**
+	 * Performs {@code this * vector}, interpreting {@code vector} as a column vector, and returns 
+	 * the resulting column vector
+	 * @param vector
+	 * @return
+	 */
+	public double[] mul(Vector3D vector) {
+		if (mat[0].length != 3) {
+			throw new ArithmeticException("Dimensions were not compatible");
+		}
+		double[] res = new double[mat.length];
+		for (int r = 0; r < mat.length; r++) {
+			res[r] = mat[r][0]*vector.x;
+			res[r] = Math.fma(mat[r][1],vector.y,res[r]);
+			res[r] = Math.fma(mat[r][2],vector.z,res[r]);
+		}
+		return res;
+	}
+
+	/**
 	 * Computes the result of a * b + c in the specified context
 	 * @param a
 	 * @param b
@@ -134,6 +153,16 @@ public class Matrix {
 			}
 		}
 		return result;
+	}
+
+	public double get(int row, int col) {
+		if (row < 0 || row >= mat.length) {
+			throw new IndexOutOfBoundsException(row);
+		}
+		else if (col < 0 || col >= mat[0].length) {
+			throw new IndexOutOfBoundsException(col);
+		}
+		return mat[row][col];
 	}
 
 	public static Matrix fromDiagonal(double[] diag) {
@@ -226,6 +255,125 @@ public class Matrix {
 		for (int i = 0; i < result.length; i++) {
 			result[i][0] = vec.get(i).doubleValue();
 		}
-		return new Matrix(result,false);
+		return new Matrix(result);
+	}
+
+	public static Matrix fromColumns(double[]... cols) {
+		return new Matrix(transpose(cols),false);
+	}
+
+	public static Matrix fromVectorColumns(Vector3D... cols) {
+		double[][] result = new double[3][cols.length];
+		for (int i = 0; i < cols.length; i++) {
+			result[0][i] = cols[i].x;
+			result[1][i] = cols[i].y;
+			result[2][i] = cols[i].z;
+		}
+		return new Matrix(result, false);
+	}
+
+	private static double[][] transpose(double[][] mat) {
+		double[][] res = new double[mat[0].length][mat.length];
+		for (int r = 0; r < mat.length; r++) {
+			for (int c = 0; c < mat[r].length; c++) {
+				res[c][r] = mat[r][c];
+			}
+		}
+		return res;
+	}
+
+	public Matrix transpose() {
+		return new Matrix(transpose(mat));
+	}
+
+	/**
+	 * Computes the inverse of this matrix
+	 * @return
+	 * @throws ArithmeticException if this matrix is not invertible
+	 */
+	public Matrix inverse() {
+		if (mat[0].length != mat.length) {
+			throw new ArithmeticException("Matrix was not a square matrix");
+		}
+
+		if (mat.length == 1) {
+			if (mat[0][0] == 0) {
+				throw new ArithmeticException("This matrix is not invertible");
+			}
+			return new Matrix(new double[][]{{1/mat[0][0]}},false);
+		}
+		else if (mat.length == 2) {
+			double det = mat[0][0]*mat[1][1]-mat[1][0]*mat[0][1];
+			if (det == 0) {
+				throw new ArithmeticException("This matrix is not invertible");
+			}
+			return new Matrix(new double[][]{{mat[1][1]/det,-mat[0][1]/det},{-mat[1][0]/det,mat[0][0]/det}},false);
+		}
+		else if (mat.length == 3) {
+			double A = mat[1][1]*mat[2][2]-mat[1][2]*mat[2][1], D = -(mat[0][1]*mat[2][2]-mat[0][2]*mat[1][1]), G = mat[0][1]*mat[1][2]-mat[0][2]*mat[1][1];
+			double B = -(mat[1][0]*mat[2][2]-mat[1][2]*mat[2][0]), E=mat[0][0]*mat[2][2]-mat[0][2]*mat[2][0], H = -(mat[0][0]*mat[1][2]-mat[0][2]*mat[1][0]);
+			double C = mat[1][0]*mat[2][1]-mat[1][1]*mat[2][0], F = -(mat[0][0]*mat[2][1]-mat[0][1]*mat[2][0]), I = mat[0][0]*mat[1][1]-mat[0][1]*mat[1][0];
+			
+			double det = mat[0][0]*A+mat[0][1]*B+mat[0][2]*C;
+			if (det == 0) {
+				throw new ArithmeticException("This matrix is not invertible");
+			}
+			return new Matrix(new double[][]{{A/det,D/det,G/det},{B/det,E/det,H/det},{C/det,F/det,I/det}},false);
+		}
+
+		double[][] aug = new double[mat.length][mat.length*2];
+		for (int r = 0; r < mat.length; r++) {
+			aug[r][r+mat.length] = 1;
+			for (int c = 0; c < mat.length; c++) {
+				aug[r][c] = mat[r][c];
+			}
+		}
+
+		for (int c = 0; c < mat.length; c++) {
+			//pivot row;
+			int k = -1;
+			for (int j = c; j < mat.length; j++) {
+				if (aug[j][c] != 0 && (k == -1 || Math.abs(aug[j][c]) > Math.abs(aug[k][c]))) {
+					k = j;
+				}
+			}
+			if (k == -1) {
+				throw new ArithmeticException("This matrix was not invertible");
+			}
+			if (k != c) {
+				double[] tmp = aug[k];
+				aug[k] = aug[c];
+				aug[c] = tmp;
+			}
+			for (int r = c+1; r < mat.length; r++) {
+				double scale = aug[r][c] / aug[c][c];
+				aug[r][c] = 0;
+				for (int i = c+1; i < aug[r].length; i++) {
+					aug[r][i] -= aug[c][i]*scale;
+				}
+			}
+		}
+		//work backwards
+		for (int r = aug.length-1; r >= 0; r--) {
+			double f = aug[r][r];
+			aug[r][r] = 1;
+			for (int c = r+1; c < aug[r].length; c++) {
+				aug[r][c] /= f;
+			}
+			for (int r2 = 0; r2 < r; r2++) {
+				f = aug[r2][r];
+				aug[r2][r] = 0;
+				for (int c = r+1; c < aug[r2].length; c++) {
+					aug[r2][c] -= aug[r][c]*f;
+				}
+			}
+		}
+		double[][] result = new double[mat.length][mat.length];
+		for (int r = 0; r < aug.length; r++) {
+			for (int c = mat.length; c < aug[r].length; c++) {
+				result[r][c-mat.length] = aug[r][c];
+			}
+		}
+		return new Matrix(result, false);
 	}
 }

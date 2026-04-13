@@ -2,6 +2,9 @@ package ODM;
 
 import java.util.*;
 import java.util.regex.MatchResult;
+
+import ExtraMath.Vector3D;
+
 import java.time.*;
 
 public class ManeuverParameters {

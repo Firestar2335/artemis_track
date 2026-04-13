@@ -1,4 +1,4 @@
-package ODM;
+package ExtraMath;
 import java.math.BigDecimal;
 
 /**
@@ -26,6 +26,15 @@ public class Vector3D {
 		this.x=x;
 		this.y=y;
 		this.z=z;
+	}
+
+	public Vector3D(double[] comp) {
+		if (comp.length != 3) {
+			throw new IllegalArgumentException("Wrong number of components were provided");
+		}
+		x=comp[0];
+		y=comp[1];
+		z=comp[2];
 	}
 
 	public String toString() {
@@ -141,5 +150,23 @@ public class Vector3D {
 			ang *= -1;
 		}
 		return ang;
+	}
+
+	/**
+	 * Returns an array of numbers that represents this vector in polar form. The numbers returned, 
+	 * in order, are: 
+	 * <ul>
+	 * <li> r: the radial distance from this vector to the origin.
+	 * <li> &#x03c6;: the azimuth; the angular distance clockwise from the x-axis to this vector 
+	 * projected onto the XY plane
+	 * <li> &#x03b8;: the elevation; the angle between this vector and the XY-plane
+	 * </ul>
+	 * @return The tuple (r,&#x03c6;,&#x03b8;)
+	 */
+	public double[] toPolarForm() {
+		double r = mag();
+		double azimuth = Math.atan2(y,x);
+		double elevation = Math.atan2(z,Math.hypot(x,y));
+		return new double[]{r,azimuth,elevation};
 	}
 }

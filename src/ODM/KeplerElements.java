@@ -3,6 +3,8 @@ import java.time.*;
 import java.util.*;
 import java.util.regex.*;
 
+import ExtraMath.Vector3D;
+
 public class KeplerElements {
 	private static final double EPSILON = 1e-9;
 

@@ -1,4 +1,4 @@
-import ODM.Vector3D;
+package ExtraMath;
 
 public class Quaternion {
 	/** The zero quaternion */
@@ -40,20 +40,17 @@ public class Quaternion {
 		return false;
 	}
 
-	public EulerAngles toEulerAngles() {
-		double roll = Math.atan2(2*(r*i+j*k),1-2*(i*i+j*j));
-		double pitch = Math.asin(2*(r*j-k*i));
-		double yaw = Math.atan2(2*(r*k+i*j),1-2*(j*j+k*k));
-		return new EulerAngles(yaw, pitch, roll);
-	}
-
-	public double[][] toRotationMatrix() {
+	private double[][] toRotationMatrix() {
 		double[][] mat = new double[3][3];
 		double s = 1/magSquared();
 		mat[0][0] = 1-2*s*(j*j+k*k); mat[0][1] = 2*s*(i*j-k*r); mat[0][2] = 2*s*(i*k+j*r);
 		mat[1][0] = 2*s*(i*j+k*r); mat[1][1] = 1-2*s*(i*i+k*k); mat[1][2] = 2*s*(j*k-i*r);
 		mat[2][0] = 2*s*(i*k-j*r); mat[2][1] = 2*s*(j*k+i*r); mat[2][2] = 1-2*s*(i*i+j*j);
 		return mat;
+	}
+
+	public Matrix toMatrix() {
+		return new Matrix(toRotationMatrix());
 	}
 
 	/**
@@ -273,6 +270,16 @@ public class Quaternion {
 	 */
 	public Vector3D conjugation(Vector3D vector) {
 		return mul(vector).mul(inverse()).toVector();
+	}
+
+	/**
+	 * Computes the quaternion representing a counterclockwise rotation about the given axis
+	 * @param angle The counterclockwise angle, in radians
+	 * @param axis The axis of rotation
+	 * @return
+	 */
+	public static Quaternion forRotation(double angle, Vector3D axis) {
+		return fromVector(Math.sin(angle/2),axis.unit().mul(Math.sin(angle/2)));
 	}
 
 	/**

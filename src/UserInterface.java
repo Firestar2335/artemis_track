@@ -1,5 +1,9 @@
 import java.time.*;
 import java.util.concurrent.*;
+
+import ExtraMath.Quaternion;
+import ExtraMath.Vector3D;
+
 import java.util.*;
 import java.io.IOException;
 import ODM.*;
@@ -158,7 +162,7 @@ public class UserInterface implements Runnable {
 			double k = data.getFromID(2015).getValueDouble();
 
 			Quaternion state = new Quaternion(r,i,j,k);
-			return state.toEulerAngles();
+			return EulerAngles.fromQuaternion(state);
 		}
 		catch (NoSuchElementException e) {
 			return null;

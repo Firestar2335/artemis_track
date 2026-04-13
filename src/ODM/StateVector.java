@@ -4,6 +4,7 @@ import java.time.*;
 import java.util.*;
 import java.util.regex.*;
 
+import ExtraMath.Vector3D;
 import cern.jet.math.Bessel;
 
 public class StateVector {
