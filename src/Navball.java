@@ -6,27 +6,38 @@ import java.awt.color.ColorSpace;
 import java.awt.image.*;
 import javax.imageio.*;
 import java.util.*;
+import java.awt.geom.Ellipse2D;
 
 /**
  * Ideally, I would have this done on the GPU, but I am not smart enough to figure out how to do that 
  * in a few days so I am just doing it this way
  */
 @SuppressWarnings("unused")
-public class Navball {
+public class Navball extends Component {
 	private static final Color TRANSPARENT = new Color(0.0f,0.0f,0.0f,0.0f);
+
+	private Image im;
 
 	private static final double EPSILON = 1e-10;
 
 	/** For roll */
 	private double[][] rollMat;
 
-	//private int width;
-	//private int height;
+	private int width;
 
 	//private final File image;
 	private final BufferedImage navball;
 	private final int textureWidth;
 	private final int textureHeight;
+
+	private Image progradeImage;
+	private Image retrogradeImage;
+	private Image radialInImage;
+	private Image radialOutImage;
+	private Image normalImage;
+	private Image antinormalImage;
+
+	private Image cursor;
 
 	private double yaw;
 	private double pitch;
@@ -43,13 +54,25 @@ public class Navball {
 	public Navball(File imageDir, int width) {
 		try {
 			navball = ImageIO.read(new File(imageDir, "IVANavBall.png"));
+			progradeImage = ImageIO.read(new File(imageDir, "prograde.png"));
+			retrogradeImage = ImageIO.read(new File(imageDir, "retrograde.png"));
+			radialInImage = ImageIO.read(new File(imageDir, "radialIn.png"));
+			radialOutImage = ImageIO.read(new File(imageDir, "radialOut.png"));
+			normalImage = ImageIO.read(new File(imageDir, "normal.png"));
+			antinormalImage = ImageIO.read(new File(imageDir, "antinormal.png"));
+			cursor = ImageIO.read(new File(imageDir, "NavBallCursor.png"));
 		}
 		catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
 		textureWidth = navball.getWidth();
 		textureHeight = navball.getHeight();
-		prod = new NavBallProducer(width);
+		this.width = width;
+		prod = new NavBallProducer();
+		yaw = 0;
+		pitch = 0;
+		roll = 0;
+		rollMat = new double[][]{{1,0},{0,1}};
 	}
 
 	/**
@@ -213,7 +236,7 @@ public class Navball {
 			return TRANSPARENT;
 		}
 		p = matMul(rollMat, p);
-		p = orthographic(p[0],p[1],-yaw,pitch,radius);
+		p = orthographic(-p[0],p[1],yaw,-pitch,radius);
 		return sample(p[0]*(textureWidth-1)/Math.TAU+(textureWidth-1)/2.0,(textureHeight-1)/2.0-p[1]*(textureHeight-1)/Math.PI);
 	}
 
@@ -231,7 +254,8 @@ public class Navball {
 
 		Matrix basis = Matrix.fromVectorColumns(xBasis,yBasis,zBasis);
 
-		Matrix basisChange = basis.inverse();
+		//Matrix basisChange = basis.inverse();
+		Matrix basisChange = basis.transpose();//This is an orthonormal matrix, so its inverse is its transpose
 
 		Matrix newRotation = attitude.toMatrix().mul(basisChange);
 
@@ -242,7 +266,15 @@ public class Navball {
 		yaw = Math.atan2(newRotation.get(1,0),newRotation.get(0,0));
 		pitch = Math.asin(-newRotation.get(2,0));
 		roll = Math.atan2(newRotation.get(2,1),newRotation.get(2,2));
-		genRollRotMat(roll);
+		rollMat = genRotMat(-roll);
+	}
+
+	public void setAngle(double yaw, double pitch, double roll) {
+		this.yaw = yaw;
+		this.pitch = pitch;
+		this.roll = roll;
+		rollMat = genRotMat(-this.roll);
+		prod.resendAll();
 	}
 
 	/**
@@ -255,7 +287,7 @@ public class Navball {
 	 * @param radius
 	 * @return the tuple (longitude, latitude)
 	 */
-	private double[] orthographic(double x, double y, double centerLongitude, double centerLatitude, double radius) {
+	private static double[] orthographic(double x, double y, double centerLongitude, double centerLatitude, double radius) {
 		if (x == 0 && y == 0) {
 			return new double[]{centerLongitude, centerLatitude};
 		}
@@ -267,13 +299,34 @@ public class Navball {
 		return new double[]{longitude, latitude};
 	}
 
+	/**
+	 * Converts the provided longiude and latitude to a point in the cartesian plane through an 
+	 * orthographic projection
+	 * @param longitude
+	 * @param latitude
+	 * @param centerLongitude
+	 * @param centerLatitude
+	 * @param radius
+	 * @return
+	 */
+	private static double[] toOrthographic(double longitude, double latitude, double centerLongitude, double centerLatitude, double radius) {
+		double x = radius * Math.cos(latitude) * Math.sin(longitude - centerLongitude);
+		double y = radius * (Math.cos(centerLatitude) * Math.sin(latitude) - Math.sin(centerLatitude)*Math.cos(latitude) * Math.cos(longitude-centerLongitude));
+		return new double[]{x,y};
+	}
 
-	private void genRollRotMat(double roll) {
-		rollMat = new double[2][2];
-		rollMat[0][0] = Math.cos(-roll);
-		rollMat[0][1] = -Math.sin(-roll);
-		rollMat[1][0] = Math.sin(-roll);
-		rollMat[1][1] = Math.cos(-roll);
+	/**
+	 * Produces the 2x2 rotation matrix for a counterclockwise rotation
+	 * @param roll
+	 * @return
+	 */
+	private static double[][] genRotMat(double roll) {
+		double[][] rollMat = new double[2][2];
+		rollMat[0][0] = Math.cos(roll);
+		rollMat[0][1] = -Math.sin(roll);
+		rollMat[1][0] = Math.sin(roll);
+		rollMat[1][1] = Math.cos(roll);
+		return rollMat;
 	}
 
 	private static double[] matMul(double[][] mat, double[] point) {
@@ -287,46 +340,108 @@ public class Navball {
 		return prod;
 	}
 
-	public void updateWidth(int width) {
-		prod.setWidth(width);
+	public void updateWidth(int newWidth) {
+		//prod.setWidth(width);
+		this.width = newWidth;
 		prod.resendAll();
 	}
 
+	public Dimension getPreferredSize() {
+		return new Dimension(width,width);
+	}
+
+	public void setVectors(Vector3D prograde, Vector3D normal, Vector3D radialOut) {
+		this.prograde = prograde;
+		this.normal = normal;
+		this.radialOut = radialOut;
+	}
+
+	public void paint(Graphics g) {
+		if (im == null) {
+			im = createImage(prod);
+		}
+		//g.setColor(Color.BLACK);
+		//g.fillRect(0, 0, width, width);
+		g.drawImage(im,0,0, Color.BLACK, null);
+		g.setClip(new Ellipse2D.Double(0, 0, width, width));
+		double[][] mat = genRotMat(roll);
+		if (prograde != null) {
+			drawVector(g, prograde, progradeImage, mat);
+			drawVector(g,prograde.negate(),retrogradeImage,mat);
+		}
+		if (normal != null) {
+			drawVector(g, normal, normalImage, mat);
+			drawVector(g, normal.negate(), antinormalImage, mat);
+		}
+		if (radialOut != null) {
+			drawVector(g, radialOut, radialOutImage, mat);
+			drawVector(g, radialOut.negate(), radialInImage, mat);
+		}
+		g.drawImage(cursor,width/2-55,width/2-6,null);
+	}
+
+	private void drawVector(Graphics g, Vector3D vec, Image im, double[][] mat) {
+		double[] polar = vec.toPolarForm();
+		polar[2] = -polar[2];
+		double cosC = Math.sin(-pitch)*Math.sin(polar[2])+Math.cos(-pitch)*Math.cos(polar[2])*Math.cos(polar[1]-yaw);
+		if (cosC > 0) {
+			double radius = width / 2.0;
+			double[] point = toOrthographic(polar[1],polar[2],yaw,-pitch,radius);
+			point[0] = -point[0];
+			point[1] = point[1];
+			point = matMul(mat,point);
+			point[0] = point[0]+radius;
+			point[1] = point[1] + radius;
+			int x = (int) (point[0] - im.getWidth(null)/2.0);
+			int y = (int) (point[1] - im.getHeight(null)/2.0);
+			g.drawImage(im,x,y,null);
+		}
+	}
+	
 	private class NavBallProducer implements ImageProducer {
-		private int width;
+		//private int width;
 
 		private Set<ImageConsumer> consumers;
 
-		public NavBallProducer(int width) {
-			this.width = width;
+		public NavBallProducer() {
+			//this.width = width;
 			consumers = new HashSet<>();
 		}
 
-		public int getWidth() {
-			return width;
-		}
+		//public int getWidth() {
+		//	return width;
+		//}
 
-		public void setWidth(int newWidth) {
-			this.width = newWidth;
-		}
+		//public void setWidth(int newWidth) {
+		//	width = newWidth;
+		//}
 
 		public boolean isConsumer(ImageConsumer ic) {
 			return consumers.contains(ic);
 		}
 
 		public void removeConsumer(ImageConsumer ic) {
+			/*System.out.print("removeConsumer: ");
+			System.out.println(ic);
+			System.out.println(consumers);*/
+			//throw new RuntimeException();
 			boolean rm = consumers.remove(ic);
-			if (!rm) {
+			//System.out.println(consumers);
+			/*if (!rm) {
 				throw new IllegalArgumentException("The provided consumer was not already a consumer");
-			}
+			}*/
 		}
 
 		public void addConsumer(ImageConsumer ic) {
+			//System.out.print("AddConsumer: ");
+			//System.out.println(ic);
 			consumers.add(ic);
 			send(ic);
 		}
 
 		public void startProduction(ImageConsumer ic) {
+			//System.out.print("startProduction: ");
+			//System.out.println(ic);
 			consumers.add(ic);
 			send(ic);
 		}
@@ -349,7 +464,13 @@ public class Navball {
 			for (int r = 0; r < width; r++) {
 				scanline = new int[width];
 				for (int c = 0; c < width; c++) {
-					scanline[c] = getColor(c,r,width).getRGB();
+					try {
+						scanline[c] = getColor(c,r,width).getRGB();
+					}
+					catch (RuntimeException e) {
+						cons.imageComplete(ImageConsumer.IMAGEERROR);
+						throw e;
+					}
 				}
 				cons.setPixels(0,r,width,1,ARGB,scanline,0,width);
 			}

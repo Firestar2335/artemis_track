@@ -8,7 +8,7 @@ public class Vector3D {
 	/** Unit vector in the direction of the x-axis */
 	public static final Vector3D X_UNIT = new Vector3D(1,0,0);
 	/** Unit vector in the direction of the y-axis */
-	public static final Vector3D Y_UNIT = new Vector3D(0,1,1);
+	public static final Vector3D Y_UNIT = new Vector3D(0,1,0);
 	/** Unit vector in the direction of the z-axis */
 	public static final Vector3D Z_UNIT = new Vector3D(0,0,1);
 
@@ -56,6 +56,14 @@ public class Vector3D {
 	 */
 	public Vector3D mul(double scalar) {
 		return new Vector3D(x*scalar, y*scalar, z*scalar);
+	}
+
+	/**
+	 * Computes {@code -this}
+	 * @return The negation of {@code this}
+	 */
+	public Vector3D negate() {
+		return new Vector3D(-x,-y,-z);
 	}
 
 	/**

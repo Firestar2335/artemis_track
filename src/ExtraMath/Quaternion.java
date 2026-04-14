@@ -309,4 +309,44 @@ public class Quaternion {
 	public static Quaternion fromVector(double real, Vector3D vector) {
 		return new Quaternion(real,vector.x,vector.y,vector.z);
 	}
+
+	public static Quaternion fromMatrix(Matrix mat) {
+		if (mat.getNumRows() != 3 || mat.getNumColumns() != 3) {
+			throw new IllegalArgumentException("The provided matrix was not a 3x3");
+		}
+		double n4 = 1 + mat.get(0,0) + mat.get(1,1) + mat.get(2,2);
+		double n1 = 1 + mat.get(0,0) - mat.get(1,1) - mat.get(2,2);
+		double n2 = 1 - mat.get(0,0) + mat.get(1,1) - mat.get(2,2);
+		double n3 = 1 - mat.get(0,0) - mat.get(1,1) + mat.get(2,2);
+
+		double max = Math.max(Math.max(n1,n2),Math.max(n3,n4));
+
+		double r,i,j,k;
+
+		if (max == n4) {
+			r = Math.sqrt(n4)/2;
+			i = (mat.get(1,2)-mat.get(2,1))/(4*r);
+			j = (mat.get(2,0)-mat.get(0,2))/(4*r);
+			k = (mat.get(0,1)-mat.get(1,0))/(4*r);
+		}
+		else if (max == n1) {
+			i = Math.sqrt(n1)/2;
+			j = (mat.get(0,1)+mat.get(1,0))/(4*i);
+			k = (mat.get(0,2)+mat.get(2,0))/(4*i);
+			r = (mat.get(1,2)+mat.get(2,1))/(4*i);
+		}
+		else if (max == n2) {
+			j = Math.sqrt(n2)/2;
+			i = (mat.get(1,0)+mat.get(0,1))/(4*j);
+			k = (mat.get(1,2)+mat.get(2,1))/(4*j);
+			r = (mat.get(2,0)-mat.get(0,2))/(4*j);
+		}
+		else {//max  == n3
+			k = Math.sqrt(n3)/2;
+			i = (mat.get(2,0)+mat.get(0,2))/(4*k);
+			j = (mat.get(2,1)+mat.get(1,2))/(4*k);
+			r = (mat.get(0,1)-mat.get(1,0))/(4*k);
+		}
+		return new Quaternion(r,i,j,k);
+	}
 }

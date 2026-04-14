@@ -4,11 +4,14 @@ import ODM.KeplerElements;
 import java.awt.BorderLayout;
 import java.awt.event.*;
 import java.awt.Color;
+import java.awt.Image;
 
 import javax.swing.*;
 import javax.swing.text.*;
 
 import java.time.Duration;
+
+import java.io.File;
 
 public class GUI {
 	private static final Color BACKGROUND = new Color(255,255,208);
@@ -23,6 +26,10 @@ public class GUI {
 
 	private final JTextComponent currentData;
 
+	private final Navball navball;
+
+	private Image navballImage;
+
 	public GUI(UserInterface parent) {
 		this.parent = parent;
 		frame = new JFrame("Artemis II Telemetry Data");
@@ -36,6 +43,8 @@ public class GUI {
 		currentData.setBackground(BACKGROUND);
 		frame.getContentPane().add(BorderLayout.SOUTH,currentData);
 		frame.setVisible(true);
+		navball = new Navball(new File("./data"),500);
+		navballImage = frame.createImage(navball.getProducer());
 	}
 
 	public void updateCurrentTelemetry(Duration elapsedTime,StateVector vectors, KeplerElements elements, EulerAngles attitude) {
