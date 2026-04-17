@@ -4,6 +4,7 @@
 		"src"
 	],
 	"java.project.referencedLibraries": [
-		"lib\\colt\\colt.jar"
+		"lib\\colt\\colt.jar",
+		"test-lib\\**\\*.jar"
 	]
 }

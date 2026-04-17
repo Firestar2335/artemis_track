@@ -108,6 +108,16 @@ public class Matrix {
 		return res;
 	}
 
+	public Matrix mul(double scalar) {
+		double[][] res = new double[mat.length][mat[0].length];
+		for (int r = 0; r < mat.length; r++) {
+			for (int c = 0; c < mat[0].length; c++) {
+				res[r][c] = scalar * mat[r][c];
+			}
+		}
+		return new Matrix(res,false);
+	}
+
 	/**
 	 * Computes the result of a * b + c in the specified context
 	 * @param a
@@ -270,6 +280,19 @@ public class Matrix {
 			result[2][i] = cols[i].z;
 		}
 		return new Matrix(result, false);
+	}
+
+	/**
+	 * Creates the nxn identity matrix
+	 * @param size
+	 * @return
+	 */
+	public static Matrix identity(int size) {
+		double[][] res = new double[size][size];
+		for (int i = 0; i < size; i++) {
+			res[i][i] = 1;
+		}
+		return new Matrix(res, false);
 	}
 
 	private static double[][] transpose(double[][] mat) {

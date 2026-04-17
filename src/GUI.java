@@ -28,8 +28,6 @@ public class GUI {
 
 	private final Navball navball;
 
-	private Image navballImage;
-
 	public GUI(UserInterface parent) {
 		this.parent = parent;
 		frame = new JFrame("Artemis II Telemetry Data");
@@ -44,7 +42,7 @@ public class GUI {
 		frame.getContentPane().add(BorderLayout.SOUTH,currentData);
 		frame.setVisible(true);
 		navball = new Navball(new File("./data"),500);
-		navballImage = frame.createImage(navball.getProducer());
+		//navballImage = frame.createImage(navball.getProducer());
 	}
 
 	public void updateCurrentTelemetry(Duration elapsedTime,StateVector vectors, KeplerElements elements, EulerAngles attitude) {
