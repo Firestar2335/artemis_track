@@ -470,12 +470,7 @@ public class Quaternion {
 			s = y/h;
 			c = x/h;
 		}
-		Quaternion inv = new Quaternion(c,-s,0,0);
-		System.out.println(this);
-		System.out.println(inv);
-		System.out.println(y);
-		System.out.println(x);
-		return mul(inv);
+		return mul(new Quaternion(c,-s,0,0));
 	}
 
 	/**

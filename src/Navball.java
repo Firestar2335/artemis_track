@@ -5,18 +5,15 @@ import java.awt.*;
 import java.awt.image.*;
 import javax.imageio.*;
 import java.util.*;
-import java.awt.geom.*;
+import java.awt.geom.Ellipse2D;
 
 /**
  * Ideally, I would have this done on the GPU, but I am not smart enough to figure out how to do that 
  * in a few days so I am just doing it this way
  */
 public class Navball extends Component {
+	private static final ColorModel ARGB = ColorModel.getRGBdefault();
 	private static final Color TRANSPARENT = new Color(0.0f,0.0f,0.0f,0.0f);
-
-	/** The image that is being made */
-	private Image im;
-
 	private static final double EPSILON = 1e-10;
 
 	private int width;
@@ -42,9 +39,10 @@ public class Navball extends Component {
 
 	private NavBallProducer prod;
 
-	private static final ColorModel ARGB = ColorModel.getRGBdefault();
-
 	private boolean debug;
+
+	/** The image that is being made */
+	private Image im;
 
 	public Navball(File imageDir, int width) {
 		this(imageDir, "IVANavBall.png", false, width);
@@ -69,9 +67,9 @@ public class Navball extends Component {
 		textureWidth = navball.getWidth();
 		textureHeight = navball.getHeight();
 		this.width = width;
-		prod = new NavBallProducer();
 		this.debug = debug;
 		att = Quaternion.REAL_UNIT;
+		prod = new NavBallProducer();
 	}
 
 	/**
@@ -237,7 +235,13 @@ public class Navball extends Component {
 	 */
 	public void updateAngles(Quaternion attitude, StateVector state) {
 		//Construct matrix of basis vectors
-		Vector3D zBasis = state.pos.mag() <= EPSILON ? Vector3D.Z_UNIT : state.pos.unit();
+		Vector3D zBasis;
+		if (state.pos.mag() <= EPSILON) {
+			zBasis = Vector3D.Z_UNIT;
+		}
+		else {
+			zBasis = state.pos.unit();
+		}
 		Vector3D yBasis = zBasis.cross(Vector3D.Z_UNIT);
 		if (yBasis.mag() <= EPSILON) {
 			yBasis = Vector3D.Y_UNIT;
@@ -312,12 +316,12 @@ public class Navball extends Component {
 		g.drawImage(cursor,width/2-55,width/2-6,null);
 	}
 
-	private void drawVector(Graphics g, Vector3D vec, Image imt) {
+	private void drawVector(Graphics g, Vector3D vec, Image vectorImage) {
 		Vector3D result = att.conjugate().conjugation(vec);
-		if (result.x > 0) {
-			int x = (int) ( result.y * width/2.0 + width/2.0 - im.getWidth(null)/2.0);
-			int y = (int) (-result.z * width/2.0 + width/2.0 - im.getHeight(null)/2.0);
-			g.drawImage(im,x,y,null);
+		if (result.x >= 0) {
+			int x = (int) ( result.y * width/2.0 + width/2.0 - vectorImage.getWidth(null)/2.0);
+			int y = (int) (-result.z * width/2.0 + width/2.0 - vectorImage.getHeight(null)/2.0);
+			g.drawImage(vectorImage,x,y,null);
 		}
 	}
 
