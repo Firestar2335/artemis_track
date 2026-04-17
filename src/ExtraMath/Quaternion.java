@@ -26,6 +26,8 @@ public class Quaternion {
 	/** The conjugate of this quaternion */
 	private Quaternion conj;
 
+	private Quaternion inv;
+
 	/**
 	 * Constructs the quaternion with the specified components
 	 * @param r The real component
@@ -38,6 +40,7 @@ public class Quaternion {
 		this.i = i;
 		this.j = j;
 		this.k = k;
+		inv = null;
 		conj = new Quaternion(r, -i, -j, -k, this);
 	}
 
@@ -57,6 +60,7 @@ public class Quaternion {
 		this.i = i;
 		this.j = j;
 		this.k = k;
+		inv = null;
 		this.conj = conjugate;
 	}
 
@@ -175,7 +179,8 @@ public class Quaternion {
 	}
 
 	/**
-	 * Computes the norm of this quaternion
+	 * Computes the norm of this quaternion. 
+	 * Equivalent to {@code Abs[q]} in Mathemateica.
 	 * @return
 	 */
 	public double mag() {
@@ -183,7 +188,8 @@ public class Quaternion {
 	}
 
 	/**
-	 * Computes the square of the norm of this quaternion
+	 * Computes the square of the norm of this quaternion. 
+	 * Equivalent to {@code Norm[q]} in  Mathematica
 	 * @return
 	 */
 	public double magSquared() {
@@ -210,8 +216,12 @@ public class Quaternion {
 	 * @return
 	 */
 	public Quaternion inverse() {
-		double m2 = magSquared();
-		return conjugate().div(m2);//return new Quaternion(r/m2,-i/m2,-j/m2,-k/m2);
+		if (inv == null) {
+			inv = conjugate().div(magSquared());
+		}
+		return inv;
+		//double m2 = magSquared();
+		//return conjugate().div(m2);//return new Quaternion(r/m2,-i/m2,-j/m2,-k/m2);
 	}
 
 	/**
@@ -256,7 +266,8 @@ public class Quaternion {
 	}
 
 	/**
-	 * Returns the quaternion in the same direction of magnitude 1
+	 * Returns the quaternion in the same direction of magnitude 1. 
+	 * Equivalent to {@code Sign[q]} in Mathematica
 	 * @return this scaled by 1/mag()
 	 */
 	public Quaternion unit() {
@@ -264,7 +275,8 @@ public class Quaternion {
 	}
 
 	/**
-	 * Computes the magnitude of the vector part of this quaternion
+	 * Computes the magnitude of the vector part of this quaternion. 
+	 * Equivalent to {@code AbsIJK} in Mathematica.
 	 * @return
 	 */
 	public double magVector() {
@@ -337,12 +349,38 @@ public class Quaternion {
 	}
 
 	/**
+	 * Round to the nearest quaternion of either all integer  components or all odd fractions of 2.
+	 * This corresponds to {@code Round[q]} in Mathematica
+	 * @return
+	 */
+	public Quaternion round() {
+		//Integers: Round ties to half
+		//Half-integers: round ties toward positive infinity
+		double intR = Math.rint(r), intI = Math.rint(i), intJ = Math.rint(j), intK = Math.rint(k);
+		double halfR = Math.round(r+0.5)-0.5;
+		double halfI = Math.round(i+0.5)-0.5;
+		double halfJ = Math.round(j+0.5)-0.5;
+		double halfK = Math.round(k+0.5)-0.5;
+
+		double distInt = (r-intR)*(r-intR)+(i-intI)*(i-intI)+(j-intJ)*(j-intJ)+(k-intK)*(k-intK);
+		double distHalf = (r-halfR)*(r-halfR)+(i-halfI)*(i-halfI)+(j-halfJ)*(j-halfJ)+(k-halfK)*(k-halfK);
+
+		if (distInt <= distHalf) {
+			return new Quaternion(intR,intI,intJ,intK);
+		}
+		else {
+			return new Quaternion(halfR,halfI,halfJ,halfK);
+		}
+	}
+
+	/**
 	 * Computes the result of the expression {@code this * vector * this^-1}
 	 * @param vector
 	 * @return
 	 */
 	public Vector3D conjugation(Vector3D vector) {
-		return mul(vector).mul(conjugate()).toVector().div(magSquared());
+		return mul(vector).mul(inverse()).toVector();
+		//return mul(vector).mul(conjugate()).toVector().div(magSquared());
 	}
 
 	/**

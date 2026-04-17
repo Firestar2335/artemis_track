@@ -6,7 +6,7 @@ import java.net.http.*;
 import JSON.*;
 
 
-public class DataRequester implements Runnable {
+public class NetRequester extends DataGetter {
 	/** The google api storage url to retrieve from */
 	private final String URL; //"https://storage.googleapis.com/storage/v1/b/p-2-cen1/o/October%2F1%2FOctober_105_1.txt";
 	/** The most recent generation that was retrieved */
@@ -27,7 +27,7 @@ public class DataRequester implements Runnable {
 
 	private boolean log;
 
-	public DataRequester(String URL, BlockingQueue<ApiResponse> recv, Thread parent, boolean makeLogFiles, long delayMilli, int delayNano) {
+	public NetRequester(String URL, BlockingQueue<ApiResponse> recv, Thread parent, boolean makeLogFiles, long delayMilli, int delayNano) {
 		int k = Math.floorDiv(delayNano, 1_000_000);
 		if (k > 0 && delayMilli > Long.MAX_VALUE - k) {
 			k = (int)(Long.MAX_VALUE - delayMilli);
@@ -59,11 +59,11 @@ public class DataRequester implements Runnable {
 		log = makeLogFiles;
 	}
 
-	public DataRequester(String URL, BlockingQueue<ApiResponse> recv, Thread parent, boolean makeLogFiles, long delayMilli) {
+	public NetRequester(String URL, BlockingQueue<ApiResponse> recv, Thread parent, boolean makeLogFiles, long delayMilli) {
 		this(URL, recv, parent, makeLogFiles, delayMilli, 0);
 	}
 
-	public DataRequester(String URL, BlockingQueue<ApiResponse> recv, Thread parent, boolean makeLogFiles, long timeout, TimeUnit unit) {
+	public NetRequester(String URL, BlockingQueue<ApiResponse> recv, Thread parent, boolean makeLogFiles, long timeout, TimeUnit unit) {
 		if (timeout <= 0) {
 			throw new IllegalArgumentException("Timeout was not positive");
 		}

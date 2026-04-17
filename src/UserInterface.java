@@ -18,7 +18,7 @@ public class UserInterface implements Runnable {
 
 	private long milliDelay;
 
-	private final DataRequester webRequests;
+	private final DataGetter webRequests;
 
 	private final BlockingQueue<ApiResponse> recv;
 
@@ -32,7 +32,7 @@ public class UserInterface implements Runnable {
 		thisThread = Thread.currentThread();
 		milliDelay = millisecondsPerUpdate;
 		recv = new ArrayBlockingQueue<>(1);
-		webRequests = new DataRequester(objectURL, recv, thisThread, makeLogFiles, webRequestTimer, unit);
+		webRequests = new NetRequester(objectURL, recv, thisThread, makeLogFiles, webRequestTimer, unit);
 		quit = false;
 		if (useGUI) {
 			gui = new GUI(this);
@@ -53,7 +53,8 @@ public class UserInterface implements Runnable {
 		ApiResponse lastData = null;
 		StateVector lastVectors = null;
 		KeplerElements lastElements = null;
-		EulerAngles lastAngles = null;
+		Quaternion lastAttitude = null;
+		//EulerAngles lastAngles = null;
 		Duration elapsedTime = null;
 		try {
 			while (true) {
@@ -72,10 +73,10 @@ public class UserInterface implements Runnable {
 							System.out.println();
 							printElements(lastElements);
 							System.out.println();
-							printAngles(lastAngles);
+							printAngles(EulerAngles.fromQuaternion(lastAttitude));
 						}
 						else {
-							gui.updateCurrentTelemetry(elapsedTime,lastVectors, lastElements, lastAngles);
+							gui.updateCurrentTelemetry(elapsedTime,lastVectors, lastElements, lastAttitude);
 						}
 					}
 					else {
@@ -100,7 +101,7 @@ public class UserInterface implements Runnable {
 						try {
 							lastVectors = getVectors(lastData);
 							lastElements = KeplerElements.fromStateVector(lastVectors, EARTH_GRAV_PARAM);
-							lastAngles = getEulerAngles(lastData);
+							lastAttitude = getAttitude(lastData);
 							elapsedTime = getDuration(lastData);
 						} catch (NoSuchElementException f) {
 							System.err.println("Invalid JSON telemetry received at generation "+lastData.genMicro);
@@ -155,14 +156,20 @@ public class UserInterface implements Runnable {
 	}
 
 	private EulerAngles getEulerAngles(ApiResponse data) {
+		Quaternion state = getAttitude(data);
+		if (state == null) {
+			return null;
+		}
+		return EulerAngles.fromQuaternion(state);
+	}
+
+	private Quaternion getAttitude(ApiResponse data) {
 		try {
 			double r = data.getFromID(2012).getValueDouble();
 			double i = data.getFromID(2013).getValueDouble();
 			double j = data.getFromID(2014).getValueDouble();
 			double k = data.getFromID(2015).getValueDouble();
-
-			Quaternion state = new Quaternion(r,i,j,k);
-			return EulerAngles.fromQuaternion(state);
+			return new Quaternion(r,i,j,k);
 		}
 		catch (NoSuchElementException e) {
 			return null;

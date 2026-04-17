@@ -27,6 +27,9 @@ public class EulerAngles {
 	}
 
 	public static EulerAngles fromQuaternion(Quaternion q) {
+		if (q == null) {
+			return null;
+		}
 		double roll = Math.atan2(2*(q.r*q.i+q.j*q.k),1-2*(q.i*q.i+q.j*q.j));
 		double pitch = Math.asin(Math.clamp(2*(q.r*q.j-q.k*q.i),-1,1));
 		double yaw = Math.atan2(2*(q.r*q.k+q.i*q.j),1-2*(q.j*q.j+q.k*q.k));

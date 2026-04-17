@@ -1,6 +1,8 @@
 import ODM.StateVector;
 import ODM.KeplerElements;
 
+import ExtraMath.Quaternion;
+
 import java.awt.BorderLayout;
 import java.awt.event.*;
 import java.awt.Color;
@@ -34,18 +36,28 @@ public class GUI {
 		frame.setSize(800,500);
 		frame.setBackground(BACKGROUND);
 		quitButton = new JButton("Exit");
-		quitButton.addActionListener((ActionEvent e) -> {frame.dispose();parent.quit();});
+		quitButton.addActionListener((ActionEvent e) -> {close();});
 		frame.getContentPane().add(BorderLayout.NORTH, quitButton);
 		currentData = new JTextArea("Waiting for web...",20,110);
 		currentData.setEditable(false);
 		currentData.setBackground(BACKGROUND);
 		frame.getContentPane().add(BorderLayout.SOUTH,currentData);
-		frame.setVisible(true);
 		navball = new Navball(new File("./data"),500);
+		frame.add(BorderLayout.EAST, navball);
+		frame.setVisible(true);
 		//navballImage = frame.createImage(navball.getProducer());
 	}
 
-	public void updateCurrentTelemetry(Duration elapsedTime,StateVector vectors, KeplerElements elements, EulerAngles attitude) {
-		currentData.setText(UserInterface.formatDuration(elapsedTime)+"\n"+UserInterface.formatVectors(vectors)+"\n\n"+UserInterface.formatElements(elements)+"\n\n"+UserInterface.formatAngles(attitude));
+	private void close() {
+		frame.dispose();
+		parent.quit();
+	}
+
+	public void updateCurrentTelemetry(Duration elapsedTime,StateVector vectors, KeplerElements elements, Quaternion attitude) {
+		currentData.setText(UserInterface.formatDuration(elapsedTime)+"\n"+UserInterface.formatVectors(vectors)+"\n\n"+UserInterface.formatElements(elements)+"\n\n"+UserInterface.formatAngles(EulerAngles.fromQuaternion(attitude)));
+		if (vectors != null && attitude != null) {
+			navball.updateAngles(attitude, vectors);
+			navball.repaint();
+		} 
 	}
 }
