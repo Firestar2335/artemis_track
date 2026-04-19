@@ -14,9 +14,12 @@ import java.awt.geom.Ellipse2D;
 public class Navball extends Component {
 	private static final ColorModel ARGB = ColorModel.getRGBdefault();
 	private static final Color TRANSPARENT = new Color(0.0f,0.0f,0.0f,0.0f);
+	//private static final Color DEFAULT_BG = Color.BLACK;
 	private static final double EPSILON = 1e-10;
 
 	private int width;
+
+	private int prefWidth;
 
 	private final BufferedImage navball;
 	private final int textureWidth;
@@ -40,6 +43,8 @@ public class Navball extends Component {
 	private NavBallProducer prod;
 
 	private boolean debug;
+
+	private Color bg;
 
 	/** The image that is being made */
 	private Image im;
@@ -67,9 +72,11 @@ public class Navball extends Component {
 		textureWidth = navball.getWidth();
 		textureHeight = navball.getHeight();
 		this.width = width;
+		prefWidth = width;
 		this.debug = debug;
 		att = Quaternion.REAL_UNIT;
 		prod = new NavBallProducer();
+		//setBackground(DEFAULT_BG);
 	}
 
 	/**
@@ -275,11 +282,7 @@ public class Navball extends Component {
 	public void updateWidth(int newWidth) {
 		//prod.setWidth(width);
 		this.width = newWidth;
-		prod.resendAll();
-	}
-
-	public Dimension getPreferredSize() {
-		return new Dimension(width,width);
+		//prod.resendAll();
 	}
 
 	private Color getColor(int x, int y, int width) {
@@ -299,29 +302,37 @@ public class Navball extends Component {
 		}
 		//g.setColor(Color.BLACK);
 		//g.fillRect(0, 0, width, width);
-		g.drawImage(im,0,0, Color.BLACK, null);
+		Shape clip = g.getClip();
+		g.drawImage(im,0,0, getBackground(), null);
 		g.setClip(new Ellipse2D.Double(0, 0, width, width));
 		if (prograde != null) {
-			drawVector(g, prograde, progradeImage);
-			drawVector(g,prograde.negate(),retrogradeImage);
+			drawVector(g, prograde, progradeImage, 1.0);
+			drawVector(g,prograde.negate(),retrogradeImage, 1.0);
 		}
 		if (normal != null) {
-			drawVector(g, normal, normalImage);
-			drawVector(g, normal.negate(), antinormalImage);
+			drawVector(g, normal, normalImage, 1.0);
+			drawVector(g, normal.negate(), antinormalImage, 1.0);
 		}
 		if (radialOut != null) {
-			drawVector(g, radialOut, radialOutImage);
-			drawVector(g, radialOut.negate(), radialInImage);
+			drawVector(g, radialOut, radialOutImage, 1.0);
+			drawVector(g, radialOut.negate(), radialInImage, 1.0);
 		}
-		g.drawImage(cursor,width/2-55,width/2-6,null);
+		drawCursor(g, 1.0);
+		g.setClip(clip);
 	}
 
-	private void drawVector(Graphics g, Vector3D vec, Image vectorImage) {
+	private void drawCursor(Graphics g, double scale) {
+		g.drawImage(cursor,(int) (width/2.0-55*scale),(int) (width/2.0-6*scale), 
+					(int) Math.ceil(cursor.getWidth(null)*scale), (int) Math.ceil(cursor.getHeight(null)*scale),null);
+	}
+
+	private void drawVector(Graphics g, Vector3D vec, Image vectorImage, double scale) {
 		Vector3D result = att.conjugate().conjugation(vec);
 		if (result.x >= 0) {
-			int x = (int) ( result.y * width/2.0 + width/2.0 - vectorImage.getWidth(null)/2.0);
-			int y = (int) (-result.z * width/2.0 + width/2.0 - vectorImage.getHeight(null)/2.0);
-			g.drawImage(vectorImage,x,y,null);
+			int w = vectorImage.getWidth(null), h = vectorImage.getHeight(null);
+			int x = (int) ( (result.y + 1) * width/2.0 - w*scale/2.0);
+			int y = (int) ((-result.z + 1) * width/2.0 -h*scale/2.0);
+			g.drawImage(vectorImage,x,y, (int) Math.ceil(w * scale), (int) Math.ceil(h * scale),null);
 		}
 	}
 
@@ -330,6 +341,78 @@ public class Navball extends Component {
 		return new Vector3D(x,y,z);
 	}
 	
+	//#region Component methods
+
+	public Dimension getPreferredSize() {
+		return new Dimension(prefWidth,prefWidth);
+	}
+
+	public Dimension getMinimumSize() {
+		return new Dimension(prefWidth, prefWidth);
+	}
+
+	public void setMinimumSize(Dimension minimumSize) {
+		if (minimumSize != null) {
+			prefWidth = Math.min(minimumSize.height, minimumSize.width);
+		}
+		else {
+			prefWidth = width;
+		}
+		super.setMinimumSize(new Dimension(prefWidth, prefWidth));
+	}
+
+	public void setPreferredSize(Dimension preferredSize) {
+		if (preferredSize != null) {
+			prefWidth = Math.min(preferredSize.height, preferredSize.width);
+		}
+		else {
+			prefWidth = width;
+		}
+		super.setPreferredSize(new Dimension(prefWidth, prefWidth));
+	}
+
+	public void setSize(int width, int height) {
+		updateWidth(Math.min(width, height));
+		super.setSize(width, height);
+	}
+
+	public void setSize(Dimension d) {
+		if (d == null) {
+			throw new NullPointerException();
+		}
+		updateWidth(Math.min(d.width, d.height));
+		super.setSize(d);
+	}
+
+	public void setBounds(int x, int y, int width, int height) {
+		updateWidth(Math.min(width, height));
+		super.setBounds(x,y,width,height);
+	}
+
+	public void setBounds(Rectangle r) {
+		if (r == null) {
+			throw new NullPointerException();
+		}
+		updateWidth(Math.min(r.width, r.height));
+		super.setBounds(r);
+	}
+
+	public Color getBackground() {
+		return (bg == null) ? super.getBackground() : bg;
+	}
+
+	public boolean isBackgroundSet() {
+		return bg == null;
+	}
+
+	public void setBackground(Color c) {
+		bg = c;
+		super.setBackground(c);
+	}
+
+	//#endregion Component methods
+
+
 	private class NavBallProducer implements ImageProducer {
 		//private int width;
 
@@ -369,9 +452,10 @@ public class Navball extends Component {
 		private void send(ImageConsumer cons) {
 			cons.setColorModel(ARGB);
 			cons.setHints(ImageConsumer.TOPDOWNLEFTRIGHT | ImageConsumer.COMPLETESCANLINES | ImageConsumer.SINGLEPASS);
+			int width = Navball.this.width;
 			cons.setDimensions(width, width);
 
-			int[] scanline;
+			/*int[] scanline;
 			for (int r = 0; r < width; r++) {
 				scanline = new int[width];
 				for (int c = 0; c < width; c++) {
@@ -384,7 +468,19 @@ public class Navball extends Component {
 					}
 				}
 				cons.setPixels(0,r,width,1,ARGB,scanline,0,width);
+			}*/
+			int[] lines = new int[width*width];
+			for (int r = 0; r < width; r++) {
+				for (int c = 0; c < width; c++) {
+					try {
+						lines[r*width+c] = getColor(c,r,width).getRGB();
+					} catch (RuntimeException e) {
+						cons.imageComplete(ImageConsumer.IMAGEERROR);
+						throw e;
+					}
+				}
 			}
+			cons.setPixels(0,0,width,width,ARGB,lines,0,width);
 			cons.imageComplete(ImageConsumer.SINGLEFRAMEDONE);
 		}
 

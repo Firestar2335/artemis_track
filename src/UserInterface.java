@@ -5,13 +5,15 @@ import ExtraMath.Quaternion;
 import ExtraMath.Vector3D;
 
 import java.util.*;
-import java.io.IOException;
+import java.io.*;
 import ODM.*;
 
 public class UserInterface implements Runnable {
 	private static final double FEET_PER_KILOMETER = 3280.84;
 	/** Standard gravitational parameter of earth in km^3/s^2 */
 	public static final double EARTH_GRAV_PARAM = 3.986004418e5;
+	/** Volumetric mean radius of earth, in km */
+	public static final double EARTH_RADIUS = 6371.0084;
 
 	/** The number of cycles to wait before manually checking for interrupt status */
 	private static final int INTERRUPT_CHECK_PERIOD = 10;
@@ -28,11 +30,11 @@ public class UserInterface implements Runnable {
 
 	private final GUI gui;
 
-	public UserInterface(String objectURL, long millisecondsPerUpdate, boolean makeLogFiles, boolean useGUI, long webRequestTimer, TimeUnit unit) {
+	private UserInterface(long millisecondsPerUpdate, boolean useGUI, BlockingQueue<ApiResponse> recv, DataGetter requests) {
 		thisThread = Thread.currentThread();
 		milliDelay = millisecondsPerUpdate;
-		recv = new ArrayBlockingQueue<>(1);
-		webRequests = new NetRequester(objectURL, recv, thisThread, makeLogFiles, webRequestTimer, unit);
+		this.recv = recv;
+		webRequests = requests;
 		quit = false;
 		if (useGUI) {
 			gui = new GUI(this);
@@ -40,6 +42,42 @@ public class UserInterface implements Runnable {
 		else {
 			gui = null;
 		}
+	}
+
+	/**
+	 * Creates a user interface taking data from a web server
+	 * @param millisecondsPerUpdate
+	 * @param makeLogFiles
+	 * @param useGUI
+	 * @param objectURL
+	 * @param webRequestTimer
+	 * @param unit
+	 * @return
+	 */
+	public static UserInterface fromWebRequests(long millisecondsPerUpdate, boolean makeLogFiles, boolean useGUI, String objectURL, long webRequestTimer, TimeUnit unit) {
+		BlockingQueue<ApiResponse> recv = new ArrayBlockingQueue<>(1);
+		NetRequester req = new NetRequester(objectURL, makeLogFiles, recv, Thread.currentThread(), webRequestTimer, unit);
+		return new UserInterface(millisecondsPerUpdate, useGUI, recv, req);
+	}
+	
+	/**
+	 * Creates a user interface taking data from local log files
+	 * @param millisecondsPerUpdate
+	 * @param useGUI
+	 * @param logDir
+	 * @param requestTime
+	 * @param unit
+	 * @return
+	 */
+	public static UserInterface fromLogReplay(long millisecondsPerUpdate, boolean useGUI, String logDir, long firstGeneration, double timeScale, long requestTime, TimeUnit unit) {
+		File dir = new File(logDir);
+		if (!dir.isDirectory()) {
+			throw new IllegalArgumentException("logDir did not point to a directory");
+		}
+		BlockingQueue<ApiResponse> recv = new ArrayBlockingQueue<>(1);
+		LogReplay req = new LogReplay(dir, firstGeneration,  timeScale, recv, Thread.currentThread(), requestTime, unit);
+		return new UserInterface(millisecondsPerUpdate, useGUI, recv, req);
+
 	}
 
 	public void run() {
@@ -233,7 +271,7 @@ public class UserInterface implements Runnable {
 	}
 
 	public static String formatAngles(EulerAngles angs) {
-		return angs == null ? "" : String.format("Yaw: %f°%nPitch: %f°%nRoll: %f°",Math.toDegrees(angs.yaw),Math.toDegrees(angs.pitch),Math.toDegrees(angs.roll));
+		return angs == null ? "" : String.format("Attitude relative to JME2000:%nYaw: %f°%nPitch: %f°%nRoll: %f°",Math.toDegrees(angs.yaw),Math.toDegrees(angs.pitch),Math.toDegrees(angs.roll));
 	}
 
 	private void printAngles(EulerAngles angs) {
@@ -247,7 +285,9 @@ public class UserInterface implements Runnable {
 		result.append(vecs.pos);
 		result.append(" km\nDistance from center: ");
 		result.append(vecs.pos.mag());
-		result.append(" km\nVelocity vector: ");
+		result.append(" km\nAltitude: ");
+		result.append(vecs.pos.mag()-EARTH_RADIUS);
+		result.append(" km\n\nVelocity vector: ");
 		result.append(vecs.vel);
 		result.append(" km/s\nSpeed: ");
 		result.append(vecs.vel.mag());

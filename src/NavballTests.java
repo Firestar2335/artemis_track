@@ -4,6 +4,7 @@ import ExtraMath.Vector3D;
 import ExtraMath.Quaternion;
 
 import javax.swing.*;
+import java.awt.*;
 //import javax.swing.text.*;
 
 import java.io.File;
@@ -101,7 +102,12 @@ public class NavballTests {
 		frame.add(nb);
 		debugFrame.add(debugNB);
 		//frame.setSize(517,537);
-		frame.setSize(316,339);
+		//Insets ins = frame.getInsets();
+		//frame.setSize(300+ins.left+ins.right,300+ins.top+ins.bottom);
+		//System.out.println(ins);
+		//System.out.println(frame.getInsets());
+		frame.pack();
+		//frame.setSize(316,339);
 		frame.setLocation((int) (SCREEN_WIDTH * 0.7), (int) (SCREEN_HEIGHT * 0.01));
 		debugFrame.setSize(316,339);
 		debugFrame.setLocation((int) (SCREEN_WIDTH * 0.85), (int) (SCREEN_HEIGHT * 0.01));

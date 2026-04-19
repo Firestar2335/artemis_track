@@ -1,6 +1,5 @@
 import java.io.*;
 import java.util.concurrent.*;
-import java.util.*;
 import java.net.*;
 import java.net.http.*;
 import JSON.*;
@@ -11,87 +10,55 @@ public class NetRequester extends DataGetter {
 	private final String URL; //"https://storage.googleapis.com/storage/v1/b/p-2-cen1/o/October%2F1%2FOctober_105_1.txt";
 	/** The most recent generation that was retrieved */
 	private long lastGeneration;
-	
-	/** The queue to the main process */
-	private final BlockingQueue<ApiResponse> snd;
 
-	/** The milliseconds of delay to wait */
-	private final long delayMilli;
-	/** The extra nanoseconds to wait */
-	private final int delayNano;
-
-	/** The parent thread */
-	private final Thread parent;
+	/* * The milliseconds of delay to wait */
+	//private final long delayMilli;
+	/* * The extra nanoseconds to wait */
+	//private final int delayNano;
 
 	private volatile int httpCode;
 
 	private boolean log;
 
-	public NetRequester(String URL, BlockingQueue<ApiResponse> recv, Thread parent, boolean makeLogFiles, long delayMilli, int delayNano) {
-		int k = Math.floorDiv(delayNano, 1_000_000);
-		if (k > 0 && delayMilli > Long.MAX_VALUE - k) {
-			k = (int)(Long.MAX_VALUE - delayMilli);
-		}
-		else if (k < 0 && delayMilli < Long.MIN_VALUE - k){
-			k = (int) (Long.MIN_VALUE - delayMilli);
-		}
-		this.delayMilli = delayMilli + k;
-		this.delayNano = Math.min(999_999, delayNano - 1_000_000 * k);
-		//this.delayMilli = delayMilli + Math.floorDiv(delayNano, 1_000_000);
-		//this.delayNano = Math.floorMod(delayNano,1_000_000);
-		if (delayMilli < 0) {
-			throw new IllegalArgumentException("Total delay time was negative");
-		}
-		else if (delayMilli == 0 && delayNano == 0) {
-			throw new IllegalArgumentException("Total delay time was 0");
-		}
-		try {
-			new URI(URL);
-			this.URL = URL;
-		}
-		catch (URISyntaxException e) {
-			throw new IllegalArgumentException("Provided URL was invalid", e);
-		}
-		this.snd = recv;
+	public NetRequester(String URL, boolean makeLogFiles, BlockingQueue<ApiResponse> recv, Thread parent, long delayMilli, int delayNano) {
+		super(recv, parent, delayMilli, delayNano);
+		validateURL(URL);
+		this.URL = URL;
 		lastGeneration = 0;
-		this.parent = parent;
 		httpCode = 200;
 		log = makeLogFiles;
 	}
 
-	public NetRequester(String URL, BlockingQueue<ApiResponse> recv, Thread parent, boolean makeLogFiles, long delayMilli) {
-		this(URL, recv, parent, makeLogFiles, delayMilli, 0);
+	public NetRequester(String URL, boolean makeLogFiles, BlockingQueue<ApiResponse> recv, Thread parent, long delayMilli) {
+		super(recv, parent, delayMilli);
+		validateURL(URL);
+		this.URL = URL;
+		lastGeneration = 0;
+		httpCode = 200;
+		log = makeLogFiles;
 	}
 
-	public NetRequester(String URL, BlockingQueue<ApiResponse> recv, Thread parent, boolean makeLogFiles, long timeout, TimeUnit unit) {
-		if (timeout <= 0) {
-			throw new IllegalArgumentException("Timeout was not positive");
+	public NetRequester(String URL, boolean makeLogFiles, BlockingQueue<ApiResponse> recv, Thread parent, long timeout, TimeUnit unit) {
+		super(recv, parent, timeout, unit);
+		validateURL(URL);
+		this.URL = URL;
+		lastGeneration = 0;
+		httpCode = 200;
+		log = makeLogFiles;
+	}
+
+	/**
+	 * Throws {@code IllegalArgumentException} if the provided url is not valid
+	 * @param url The URL to validat
+	 * @throws IllegalArgumentException if {@code url} is not a valid URI
+	 */
+	private static void validateURL(String url) {
+		try {
+			new URI(url);
+		} 
+		catch (URISyntaxException e) {
+			throw new IllegalArgumentException("Provided URL was invalid", e);
 		}
-		long milli;
-		int nano;
-		switch (unit) {
-			case NANOSECONDS:
-				nano = (int) (timeout % 1_000_000l);
-				milli = timeout / 1_000_000l;
-				break;
-			case MICROSECONDS:
-				nano = 1000 * (int) (timeout % 1000);
-				milli = timeout / 1000l;
-				break;
-			case MILLISECONDS:
-				nano = 0;
-				milli = timeout;
-				break;
-			default:
-				milli = unit.toMillis(timeout);
-				if (unit.convert(milli, TimeUnit.MILLISECONDS) != timeout) {
-					nano = 999999;
-				}
-				else {
-					nano = 0;
-				}
-		}
-		this(URL, recv, parent, makeLogFiles, milli, nano);
 	}
 
 	public void run() {
@@ -112,14 +79,8 @@ public class NetRequester extends DataGetter {
 						if (log) {
 							logJSON(newData,gen);
 						}
-						try {// (newData.getRoot().getObject("File").get("Type").getIntValue() == 4) {
-							snd.put(parseData(newData, gen));
-							lastGeneration = gen;
-							parent.interrupt();
-						}
-						catch (NoSuchElementException e) {
-							System.err.println("Malformed JSON telemetry received at generation "+gen);
-						}
+						send(newData, gen);
+						lastGeneration = gen;
 					}
 				}
 				Thread.sleep(delayMilli, delayNano);
@@ -138,23 +99,6 @@ public class NetRequester extends DataGetter {
 		}
 	}
 
-	
-	private static void logJSON(JsonDocument doc, long generation) {
-		try{
-			File logFile = new File("./log/Telemetry-"+generation+".json");
-			if (!logFile.exists()){
-				doc.write(logFile);
-			}
-		}
-		catch (FileNotFoundException e) {
-			
-		}
-	}
-
-	/**
-	 * Gets the HTTP status code of the most recent completed request
-	 * @return
-	 */
 	public int getStatusCode() {
 		return httpCode;
 	}
@@ -181,24 +125,6 @@ public class NetRequester extends DataGetter {
 		catch (Exception e) {
 			return null;
 		}
-	}
-
-	private static ApiResponse parseData(JsonDocument json, long generation) {
-		JsonType rootType = json.getRoot();
-		if (!(rootType instanceof JsonObject)) {
-			throw new IllegalArgumentException("Provided JSON document was not an object");
-		}
-		JsonObject root = (JsonObject) rootType;
-		JsonObject fileData = root.getObject("File");
-		List<Parameter> parameters = new ArrayList<>();
-		for (String key : root.keySet()) {
-			if (key.equals("File")) {
-				continue;
-			}
-			parameters.add(Parameter.fromMap(root.getObject(key).toStringMap()));
-		}
-
-		return new ApiResponse(generation, fileData.toStringMap(), parameters);
 	}
 
 	private long retrieveGeneration(HttpResponse<String> response) throws IOException {

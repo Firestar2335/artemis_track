@@ -9,6 +9,13 @@ import ExtraMath.*;
 //import java.math.*;
 
 public class Client {
+	/** The option to use network requests */
+	private static final String NETWORK_KEYWORD = "network";
+	/** The option to replay logs */
+	private static final String REPLAY_KEYWORD = "replay";
+
+	private static final String HELP_OPTION = "-h";
+
 	/** The default update speed in milliseconds */
 	private static final long DEFAULT_DELAY = 65000;
 
@@ -19,47 +26,164 @@ public class Client {
 	public static final double EARTH_GRAV_PARAM = 3.986004418e5;
 
 	public static void main(String[] args) {
-		//GUI Gui = new GUI(null);
 		if (args.length == 0) {
-			System.out.println("Use: java -jar artemis_track.jar [updatePeriod] [logs] [gui]");
-			System.out.println("\t-updatePeriod: Time in milliseconds to wait between printing data to the console. New data will always be printed immediately when received regardless of this option. Default: 65000");
-			System.out.println("\t-logs: Whether to save the received JSON files to the log folder. Default: false");
-			System.out.println("\t-gui: Whether to open and output data to a GUI. Default: true");
+			programHelp();
+			System.exit(0);
+		}
+		switch (args[0]) {
+			case NETWORK_KEYWORD: fromNet(args); break;
+			case REPLAY_KEYWORD: fromLocal(args); break;
+			default:
+				System.err.print("Unrecognized mode: ");
+				System.err.println(args[0]);
+				System.exit(1);
+		}
+		System.exit(0);
+	}
+
+	private static void programHelp() {
+		System.out.println("Use: java -jar artemis_track.jar " + NETWORK_KEYWORD + "|" + REPLAY_KEYWORD + " [args...]\n"
+			+ "\t-" + NETWORK_KEYWORD + ": This will take telemetry data from the NASA server to display the most recent information\n"
+			+ "\t-" + REPLAY_KEYWORD + ": This will take past telemetry data from localy stored log files to replay recorded data");
+	}
+
+	private static void netHelp() {
+		System.out.println("Use: java -jar artemis_track.jar " + NETWORK_KEYWORD + " [updatePeriod] [logs] [gui]\n"
+			+ "This will update with information from the NASA web server\n"
+			+ "\t-updatePeriod: Time in milliseconds to wait between printing data to the console. New data will always be printed immediately when received regardless of this option. Default: "+DEFAULT_DELAY+"\n"
+			+ "\t-logs: Whether to save the received JSON files to the log folder. Default: "+DEFAULT_LOGGING+"\n"
+			+ "\t-gui: Whether to open and output data to a GUI. Default: "+DEFAULT_GUI);
+	}
+
+	private static void localHelp() {
+		System.out.println("Use: java -jar artemis_track.jar " + REPLAY_KEYWORD + " logDir firstGeneration [timeScale] [updatePeriod] [gui]\n"
+			+ "This will update with information from locally stored logs to review prior data\n"
+			+ "\t-logDir: The directory that the logs are stored in\n"
+			+ "\t-firstGeneration: The generation of logs to start at\n"
+			+ "\t-timeScale: the factor by which to scale the time between logs. Must be positive. Default: 1.0\n"
+			+ "\t-updatePeriod: The time in milliseconds between each user interface refresh. Default: "+DEFAULT_DELAY+"\n"
+			+ "\t-gui: Whether to use a GUI for output. Default: "+DEFAULT_GUI);
+	}
+
+	/**
+	 * 
+	 * @param args
+	 */
+	private static void fromNet(String[] args) {
+		if (args.length == 0 || !args[0].equals(NETWORK_KEYWORD)) {
+			throw new IllegalArgumentException("The improper action was specified");
+		}
+		if (args.length == 1) {
+			netHelp();
 			System.out.println("\nUsing default values for parameters.\n");
 		}
+		else if (args.length >= 2 && args[1].equals(HELP_OPTION)) {
+			netHelp();
+			System.exit(0);
+		}
 		long delay = DEFAULT_DELAY;
-		if (args.length >= 1) {
+		if (args.length >= 2) {
 			try {
-				delay = Long.parseLong(args[0]);
+				delay = Long.parseLong(args[1]);
 			}
 			catch (NumberFormatException e) {
 				delay = DEFAULT_DELAY;
 			}
 		}
 		boolean log = DEFAULT_LOGGING;
-		if (args.length >= 2) {
-			if (args[1].equalsIgnoreCase("true")) {
+		if (args.length >= 3) {
+			if (args[2].equalsIgnoreCase("true")) {
 				log = true;
 			}
-			else if (args[1].equalsIgnoreCase("false")) {
+			else if (args[2].equalsIgnoreCase("false")) {
 				log = false;
 			}
 		}
 
 		boolean gui = DEFAULT_GUI;
-		if (args.length >= 3) {
-			if (args[2].equalsIgnoreCase("true")) {
+		if (args.length >= 4) {
+			if (args[3].equalsIgnoreCase("true")) {
 				gui = true;
 			}
-			else if (args[2].equalsIgnoreCase("false")) {
+			else if (args[3].equalsIgnoreCase("false")) {
 				gui = false;
 			}
 		}
-		UserInterface ui = new UserInterface("https://storage.googleapis.com/storage/v1/b/p-2-cen1/o/October%2F1%2FOctober_105_1.txt", delay, log, gui, 5, TimeUnit.SECONDS);
+		UserInterface ui = UserInterface.fromWebRequests(delay, log, gui, "https://storage.googleapis.com/storage/v1/b/p-2-cen1/o/October%2F1%2FOctober_105_1.txt", 5, TimeUnit.SECONDS);
 		ui.run();
-		//File testJson = new File("C:\\Users\\thoma\\Documents\\artemisII\\october1.txt");
-		//JsonDocument doc = JsonDocument.read(testJson);
-		//System.out.println(doc);
+	}
+
+	private static void fromLocal(String[] args) {
+		if (args.length == 0 || !args[0].equals(REPLAY_KEYWORD)) {
+			throw new IllegalArgumentException("The improper action was specified");
+		}
+		if (args.length == 1) {
+			localHelp();
+			System.err.println("Missing value for logDir");
+			System.exit(1);//System.out.println("Using default values for parameters.\n");
+		}
+		else if (args.length >= 2 && args[1].equals(HELP_OPTION)) {
+			localHelp();
+			System.exit(0);
+		}
+		else if (args.length == 2) {
+			localHelp();
+			System.err.println("Missing value for firstGeneration");
+			System.exit(1);
+		}
+		String dirName = args[1];
+		long firstGen = 0;
+		try {
+			firstGen = Long.parseLong(args[2]);
+		} catch (NumberFormatException e) {
+			System.err.println("The value provided for firstGeneration was not a number");
+			System.exit(1);
+		}
+		double timeScale = 1.0;
+		long delay = DEFAULT_DELAY;
+		boolean gui = DEFAULT_GUI;
+		if (args.length >= 4) {
+			try {
+				timeScale = Double.parseDouble(args[3]);
+				if (timeScale <= 0) {
+					System.err.println("Provided value for timeScale was negative");
+					System.exit(1);
+				}
+				else if (!Double.isFinite(timeScale)) {
+					System.err.println("Provided value for timeScale was not a finite value");
+					System.exit(1);
+				}
+			} catch (NumberFormatException e) {
+				System.err.println("Value provided for timeScale was not a number");
+				System.exit(1);
+			}
+		}
+		if (args.length >= 5) {
+			try {
+				delay = Long.parseLong(args[4]);
+				if (delay <= 0) {
+					System.err.println("delay was not positive");
+					System.exit(1);
+				}
+			} catch (NumberFormatException e) {
+				System.err.println("The value provided for delay was not a number");
+				System.exit(1);
+			}
+		}
+		if (args.length >= 6) {
+			if (args[5].equalsIgnoreCase("true")) {
+				gui = true;
+			}
+			else if (args[5].equalsIgnoreCase("false")) {
+				gui = false;
+			}
+			else {
+				System.err.println("The value provided for gui was not a boolean");
+				System.exit(1);
+			}
+		}
+		UserInterface ui = UserInterface.fromLogReplay(delay, gui, dirName, firstGen, timeScale, 100, TimeUnit.MILLISECONDS);
+		ui.run();
 	}
 
 	public static void rmain(String[] args) {
