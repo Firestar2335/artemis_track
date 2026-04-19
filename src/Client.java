@@ -33,6 +33,7 @@ public class Client {
 		switch (args[0]) {
 			case NETWORK_KEYWORD: fromNet(args); break;
 			case REPLAY_KEYWORD: fromLocal(args); break;
+			case HELP_OPTION: programHelp(); break;
 			default:
 				System.err.print("Unrecognized mode: ");
 				System.err.println(args[0]);
@@ -43,26 +44,26 @@ public class Client {
 
 	private static void programHelp() {
 		System.out.println("Use: java -jar artemis_track.jar " + NETWORK_KEYWORD + "|" + REPLAY_KEYWORD + " [args...]\n"
-			+ "\t-" + NETWORK_KEYWORD + ": This will take telemetry data from the NASA server to display the most recent information\n"
-			+ "\t-" + REPLAY_KEYWORD + ": This will take past telemetry data from localy stored log files to replay recorded data");
+			+ "\t- " + NETWORK_KEYWORD + ": This will take telemetry data from the NASA server to display the most recent information\n"
+			+ "\t- " + REPLAY_KEYWORD + ": This will take past telemetry data from localy stored log files to replay recorded data");
 	}
 
 	private static void netHelp() {
 		System.out.println("Use: java -jar artemis_track.jar " + NETWORK_KEYWORD + " [updatePeriod] [logs] [gui]\n"
 			+ "This will update with information from the NASA web server\n"
-			+ "\t-updatePeriod: Time in milliseconds to wait between printing data to the console. New data will always be printed immediately when received regardless of this option. Default: "+DEFAULT_DELAY+"\n"
-			+ "\t-logs: Whether to save the received JSON files to the log folder. Default: "+DEFAULT_LOGGING+"\n"
-			+ "\t-gui: Whether to open and output data to a GUI. Default: "+DEFAULT_GUI);
+			+ "\t- updatePeriod: Time in milliseconds to wait between printing data to the console. New data will always be printed immediately when received regardless of this option. Default: "+DEFAULT_DELAY+"\n"
+			+ "\t- logs: Whether to save the received JSON files to the log folder. Default: "+DEFAULT_LOGGING+"\n"
+			+ "\t- gui: Whether to open and output data to a GUI. Default: "+DEFAULT_GUI);
 	}
 
 	private static void localHelp() {
 		System.out.println("Use: java -jar artemis_track.jar " + REPLAY_KEYWORD + " logDir firstGeneration [timeScale] [updatePeriod] [gui]\n"
 			+ "This will update with information from locally stored logs to review prior data\n"
-			+ "\t-logDir: The directory that the logs are stored in\n"
-			+ "\t-firstGeneration: The generation of logs to start at\n"
-			+ "\t-timeScale: the factor by which to scale the time between logs. Must be positive. Default: 1.0\n"
-			+ "\t-updatePeriod: The time in milliseconds between each user interface refresh. Default: "+DEFAULT_DELAY+"\n"
-			+ "\t-gui: Whether to use a GUI for output. Default: "+DEFAULT_GUI);
+			+ "\t- logDir: The directory that the logs are stored in\n"
+			+ "\t- firstGeneration: The generation of logs to start at\n"
+			+ "\t- timeScale: the factor by which to scale the time between logs. Must be positive. Default: 1.0\n"
+			+ "\t- updatePeriod: The time in milliseconds between each user interface refresh. Default: "+DEFAULT_DELAY+"\n"
+			+ "\t- gui: Whether to use a GUI for output. Default: "+DEFAULT_GUI);
 	}
 
 	/**
