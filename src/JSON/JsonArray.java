@@ -44,6 +44,12 @@ public class JsonArray extends JsonType implements List<JsonType> {
 		}
 	}
 
+	/**
+	 * Creates an empty JsonArray
+	 */
+	public JsonArray() {
+		arr = new JsonType[0];
+	}
 
 	public String toString() {
 		StringBuilder result = new StringBuilder("\\[");
@@ -57,7 +63,11 @@ public class JsonArray extends JsonType implements List<JsonType> {
 	}
 
 	public static JsonArray parse(Scanner s) {
-		s.next("[");
+		s.next("\\[");
+		if (s.hasNext("]")) {//Empty array
+			s.next();
+			return new JsonArray();
+		}
 		String follower;
 		List<JsonType> res = new ArrayList<>();
 		do {

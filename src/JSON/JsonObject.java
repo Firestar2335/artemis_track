@@ -18,8 +18,19 @@ public class JsonObject extends JsonType implements SequencedMap<String, JsonTyp
 		this.entries = entries;
 	}
 
+	/**
+	 * Creates an empty JsonObject
+	 */
+	public JsonObject() {
+		entries = LinkedHashMap.newLinkedHashMap(1);
+	}
+
 	public static JsonObject parse(Scanner s) {
 		s.next("\\{");
+		if (s.hasNext("}")) {
+			s.next();
+			return new JsonObject();
+		}
 		SequencedMap<String, JsonType> result = new LinkedHashMap<>();
 		String follower;
 		do {

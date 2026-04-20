@@ -1,0 +1,672 @@
+
+{
+    "File": {
+        "Date": "2026/04/01 19:28:19",
+        "Activity": "MIS",
+        "Type": 4
+    },
+    "Parameter_2003": {
+        "Number": "2003",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.515",
+        "Type": "2",
+        "Value": "1537500.594045"
+    },
+    "Parameter_2004": {
+        "Number": "2004",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.515",
+        "Type": "2",
+        "Value": "19020863.98011"
+    },
+    "Parameter_2005": {
+        "Number": "2005",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.515",
+        "Type": "2",
+        "Value": "10317343.99256"
+    },
+    "Parameter_2009": {
+        "Number": "2009",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.515",
+        "Type": "2",
+        "Value": "-29540"
+    },
+    "Parameter_2010": {
+        "Number": "2010",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.515",
+        "Type": "2",
+        "Value": "3499"
+    },
+    "Parameter_2011": {
+        "Number": "2011",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.515",
+        "Type": "2",
+        "Value": "1866"
+    },
+    "Parameter_2012": {
+        "Number": "2012",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.542",
+        "Type": "2",
+        "Value": "0.03759508952498"
+    },
+    "Parameter_2013": {
+        "Number": "2013",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.542",
+        "Type": "2",
+        "Value": "0.1248743608594"
+    },
+    "Parameter_2014": {
+        "Number": "2014",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.542",
+        "Type": "2",
+        "Value": "0.7000313401222"
+    },
+    "Parameter_2015": {
+        "Number": "2015",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.542",
+        "Type": "2",
+        "Value": "0.7021033167839"
+    },
+    "Parameter_2016": {
+        "Number": "2016",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.890",
+        "Type": "3",
+        "Value": "37"
+    },
+    "Parameter_2026": {
+        "Number": "2026",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.890",
+        "Type": "6",
+        "Value": "340"
+    },
+    "Parameter_2040": {
+        "Number": "2040",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.265",
+        "Type": "6",
+        "Value": "0"
+    },
+    "Parameter_2041": {
+        "Number": "2041",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.265",
+        "Type": "6",
+        "Value": "0"
+    },
+    "Parameter_2042": {
+        "Number": "2042",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.265",
+        "Type": "6",
+        "Value": "0"
+    },
+    "Parameter_2048": {
+        "Number": "2048",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "0.1263054013252"
+    },
+    "Parameter_2049": {
+        "Number": "2049",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.640",
+        "Type": "2",
+        "Value": "3.8464179039"
+    },
+    "Parameter_2050": {
+        "Number": "2050",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "0.9040760397911"
+    },
+    "Parameter_2051": {
+        "Number": "2051",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "0.5825958848"
+    },
+    "Parameter_2052": {
+        "Number": "2052",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "1.644623637199"
+    },
+    "Parameter_2053": {
+        "Number": "2053",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "-0.1280704438686"
+    },
+    "Parameter_2054": {
+        "Number": "2054",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "2.543133497238"
+    },
+    "Parameter_2055": {
+        "Number": "2055",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "-0.2962777018547"
+    },
+    "Parameter_2056": {
+        "Number": "2056",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "0.5334627628326"
+    },
+    "Parameter_2057": {
+        "Number": "2057",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "3.472080945969"
+    },
+    "Parameter_2058": {
+        "Number": "2058",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.640",
+        "Type": "2",
+        "Value": "0.8812403082848"
+    },
+    "Parameter_2059": {
+        "Number": "2059",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.640",
+        "Type": "2",
+        "Value": "0.5706186890602"
+    },
+    "Parameter_2060": {
+        "Number": "2060",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.640",
+        "Type": "2",
+        "Value": "1.606548547745"
+    },
+    "Parameter_2061": {
+        "Number": "2061",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.640",
+        "Type": "2",
+        "Value": "-0.06003298610449"
+    },
+    "Parameter_2062": {
+        "Number": "2062",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.640",
+        "Type": "2",
+        "Value": "2.53541970253"
+    },
+    "Parameter_2063": {
+        "Number": "2063",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.640",
+        "Type": "2",
+        "Value": "-0.2729334533215"
+    },
+    "Parameter_2064": {
+        "Number": "2064",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.640",
+        "Type": "2",
+        "Value": "0.5412483811378"
+    },
+    "Parameter_2065": {
+        "Number": "2065",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.640",
+        "Type": "2",
+        "Value": "3.451417446136"
+    },
+    "Parameter_2066": {
+        "Number": "2066",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "0.483568251133"
+    },
+    "Parameter_2067": {
+        "Number": "2067",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "1.628499984741"
+    },
+    "Parameter_2068": {
+        "Number": "2068",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "-0.2308308035135"
+    },
+    "Parameter_2069": {
+        "Number": "2069",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "-0.7557319998741"
+    },
+    "Parameter_2070": {
+        "Number": "2070",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "0.1221604198217"
+    },
+    "Parameter_2071": {
+        "Number": "2071",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "1.262544870377"
+    },
+    "Parameter_2072": {
+        "Number": "2072",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "0.3737500011921"
+    },
+    "Parameter_2073": {
+        "Number": "2073",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "0.1988701671362"
+    },
+    "Parameter_2074": {
+        "Number": "2074",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "0.2207199335098"
+    },
+    "Parameter_2075": {
+        "Number": "2075",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "0.2730960249901"
+    },
+    "Parameter_2076": {
+        "Number": "2076",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "-0.1910493522882"
+    },
+    "Parameter_2077": {
+        "Number": "2077",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "0.4808033108711"
+    },
+    "Parameter_2078": {
+        "Number": "2078",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "1.312229275703"
+    },
+    "Parameter_2079": {
+        "Number": "2079",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "-0.0322639234364"
+    },
+    "Parameter_2080": {
+        "Number": "2080",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "-0.2162663340569"
+    },
+    "Parameter_2081": {
+        "Number": "2081",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "-0.2173053920269"
+    },
+    "Parameter_2082": {
+        "Number": "2082",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "0.09098602831364"
+    },
+    "Parameter_2083": {
+        "Number": "2083",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "0.1296309679747"
+    },
+    "Parameter_2084": {
+        "Number": "2084",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "0.1998235732317"
+    },
+    "Parameter_2085": {
+        "Number": "2085",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "0.3360722661018"
+    },
+    "Parameter_2086": {
+        "Number": "2086",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "0.3116682469845"
+    },
+    "Parameter_2087": {
+        "Number": "2087",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "-0.1527926772833"
+    },
+    "Parameter_2088": {
+        "Number": "2088",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "0.3744612634182"
+    },
+    "Parameter_2089": {
+        "Number": "2089",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.742",
+        "Type": "2",
+        "Value": "-0.314051002264"
+    },
+    "Parameter_2090": {
+        "Number": "2090",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.894",
+        "Type": "3",
+        "Value": "d8"
+    },
+    "Parameter_2091": {
+        "Number": "2091",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.718",
+        "Type": "2",
+        "Value": "1.000198125839"
+    },
+    "Parameter_2092": {
+        "Number": "2092",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.718",
+        "Type": "2",
+        "Value": "1.001039266586"
+    },
+    "Parameter_2093": {
+        "Number": "2093",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.718",
+        "Type": "2",
+        "Value": "1.001093626022"
+    },
+    "Parameter_2094": {
+        "Number": "2094",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.718",
+        "Type": "2",
+        "Value": "0.9996836185455"
+    },
+    "Parameter_2095": {
+        "Number": "2095",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.718",
+        "Type": "2",
+        "Value": "3.139796495438"
+    },
+    "Parameter_2096": {
+        "Number": "2096",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.718",
+        "Type": "2",
+        "Value": "3.139487504959"
+    },
+    "Parameter_2097": {
+        "Number": "2097",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.718",
+        "Type": "2",
+        "Value": "3.140487909317"
+    },
+    "Parameter_2098": {
+        "Number": "2098",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.718",
+        "Type": "2",
+        "Value": "3.139669179916"
+    },
+    "Parameter_2099": {
+        "Number": "2099",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.890",
+        "Type": "3",
+        "Value": "b0"
+    },
+    "Parameter_2100": {
+        "Number": "2100",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.140",
+        "Type": "6",
+        "Value": "5"
+    },
+    "Parameter_2101": {
+        "Number": "2101",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:15.917",
+        "Type": "2",
+        "Value": "0.0001552500907565"
+    },
+    "Parameter_2102": {
+        "Number": "2102",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:15.917",
+        "Type": "2",
+        "Value": "-2.77039307548e-05"
+    },
+    "Parameter_2103": {
+        "Number": "2103",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:15.917",
+        "Type": "2",
+        "Value": "6.590384873562e-05"
+    },
+    "Parameter_5002": {
+        "Number": "5002",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.191",
+        "Type": "2",
+        "Value": "57.3071312744"
+    },
+    "Parameter_5003": {
+        "Number": "5003",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.191",
+        "Type": "2",
+        "Value": "57.35532508917"
+    },
+    "Parameter_5004": {
+        "Number": "5004",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.191",
+        "Type": "2",
+        "Value": "57.35843965543"
+    },
+    "Parameter_5005": {
+        "Number": "5005",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.191",
+        "Type": "2",
+        "Value": "57.27765217795"
+    },
+    "Parameter_5006": {
+        "Number": "5006",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.191",
+        "Type": "2",
+        "Value": "179.8970876775"
+    },
+    "Parameter_5007": {
+        "Number": "5007",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.191",
+        "Type": "2",
+        "Value": "179.8793838271"
+    },
+    "Parameter_5008": {
+        "Number": "5008",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.191",
+        "Type": "2",
+        "Value": "179.9367027746"
+    },
+    "Parameter_5009": {
+        "Number": "5009",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.191",
+        "Type": "2",
+        "Value": "179.8897930354"
+    },
+    "Parameter_5010": {
+        "Number": "5010",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.191",
+        "Type": "2",
+        "Value": "1775089695.908"
+    },
+    "Parameter_5011": {
+        "Number": "5011",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.191",
+        "Type": "2",
+        "Value": "1775089697.722"
+    },
+    "Parameter_5012": {
+        "Number": "5012",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.191",
+        "Type": "2",
+        "Value": "1775089696.194"
+    },
+    "Parameter_5013": {
+        "Number": "5013",
+        "Length": "8",
+        "Status": "Good",
+        "Time": "2026:092:00:28:16.191",
+        "Type": "2",
+        "Value": "1459124914.194"
+    }
+}
