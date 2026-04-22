@@ -66,7 +66,11 @@ public class NetRequester extends DataGetter {
 		httpCode = 200;
 		try {
 			HttpRequest  metaRequest = HttpRequest.newBuilder(URI.create(URL + "?fields=generation")).GET().build();
-			while (true) {
+			while (!shouldQuit()) {
+				if (isPaused()) {
+					pauseWait();
+					continue;
+				}
 				HttpResponse<String> metaResponse = client.send(metaRequest, HttpResponse.BodyHandlers.ofString());
 				long gen = retrieveGeneration(metaResponse);
 				if (gen > lastGeneration) {
@@ -101,6 +105,22 @@ public class NetRequester extends DataGetter {
 
 	public int getStatusCode() {
 		return httpCode;
+	}
+
+	public long getMinGeneration() {
+		return lastGeneration;
+	}
+
+	public long getMaxGeneration() {
+		return lastGeneration;
+	}
+
+	public long getGeneration() {
+		return lastGeneration;
+	}
+
+	public void requestGeneration(long generation) {
+		
 	}
 
 	/**

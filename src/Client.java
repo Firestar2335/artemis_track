@@ -22,6 +22,9 @@ public class Client {
 	private static final boolean DEFAULT_LOGGING = false;
 
 	private static final boolean DEFAULT_GUI = true;
+
+	private static final long DEFAULT_REQUEST_TIME = 5_000_000_000l;
+
 	/** Standard gravitational parameter of earth in km^3/s^2 */
 	public static final double EARTH_GRAV_PARAM = 3.986004418e5;
 
@@ -45,25 +48,28 @@ public class Client {
 	private static void programHelp() {
 		System.out.println("Use: java -jar artemis_track.jar " + NETWORK_KEYWORD + "|" + REPLAY_KEYWORD + " [args...]\n"
 			+ "\t- " + NETWORK_KEYWORD + ": This will take telemetry data from the NASA server to display the most recent information\n"
-			+ "\t- " + REPLAY_KEYWORD + ": This will take past telemetry data from localy stored log files to replay recorded data");
+			+ "\t- " + REPLAY_KEYWORD + ": This will take past telemetry data from localy stored log files to replay recorded data\n"
+			+ "To get information about the arguments of each method, use the \""+HELP_OPTION+"\" option with the mode to get the arguments.");
 	}
 
 	private static void netHelp() {
-		System.out.println("Use: java -jar artemis_track.jar " + NETWORK_KEYWORD + " [updatePeriod] [logs] [gui]\n"
+		System.out.println("Use: java -jar artemis_track.jar " + NETWORK_KEYWORD + " [updatePeriod] [logs] [gui] [requestTime]\n"
 			+ "This will update with information from the NASA web server\n"
 			+ "\t- updatePeriod: Time in milliseconds to wait between printing data to the console. New data will always be printed immediately when received regardless of this option. Default: "+DEFAULT_DELAY+"\n"
 			+ "\t- logs: Whether to save the received JSON files to the log folder. Default: "+DEFAULT_LOGGING+"\n"
-			+ "\t- gui: Whether to open and output data to a GUI. Default: "+DEFAULT_GUI);
+			+ "\t- gui: Whether to open and output data to a GUI. Default: "+DEFAULT_GUI+"\n"
+			+ "\t- requestTime: The time in seconds between requests. Must be positive. Default: " + DEFAULT_REQUEST_TIME / 1_000_000_000l);
 	}
 
 	private static void localHelp() {
-		System.out.println("Use: java -jar artemis_track.jar " + REPLAY_KEYWORD + " logDir firstGeneration [timeScale] [updatePeriod] [gui]\n"
+		System.out.println("Use: java -jar artemis_track.jar " + REPLAY_KEYWORD + " logDir firstGeneration [timeScale] [updatePeriod] [gui] [requestTime]\n"
 			+ "This will update with information from locally stored logs to review prior data\n"
 			+ "\t- logDir: The directory that the logs are stored in\n"
 			+ "\t- firstGeneration: The generation of logs to start at\n"
 			+ "\t- timeScale: the factor by which to scale the time between logs. Must be positive. Default: 1.0\n"
 			+ "\t- updatePeriod: The time in milliseconds between each user interface refresh. Default: "+DEFAULT_DELAY+"\n"
-			+ "\t- gui: Whether to use a GUI for output. Default: "+DEFAULT_GUI);
+			+ "\t- gui: Whether to use a GUI for output. Default: "+DEFAULT_GUI+"\n"
+			+ "\t- requestTime: The time in nanoseconds between requests. Must be positive. Default: " + DEFAULT_REQUEST_TIME);
 	}
 
 	/**
@@ -110,7 +116,20 @@ public class Client {
 				gui = false;
 			}
 		}
-		UserInterface ui = UserInterface.fromWebRequests(delay, log, gui, "https://storage.googleapis.com/storage/v1/b/p-2-cen1/o/October%2F1%2FOctober_105_1.txt", 5, TimeUnit.SECONDS);
+
+		int requestTime = (int) (DEFAULT_REQUEST_TIME / 1_000_000_000l);
+		if (args.length >= 5) {
+			try {
+				requestTime = Integer.parseInt(args[4]);
+				if (requestTime <= 0) {
+					System.err.println("requestTime was not positive");
+					System.exit(1);
+				}
+			} catch (NumberFormatException e) {
+				System.err.println("The value provided for requestTime was not a number");
+			}
+		}
+		UserInterface ui = UserInterface.fromWebRequests(delay, log, gui, "https://storage.googleapis.com/storage/v1/b/p-2-cen1/o/October%2F1%2FOctober_105_1.txt", requestTime, TimeUnit.SECONDS);
 		ui.run();
 	}
 
@@ -183,7 +202,20 @@ public class Client {
 				System.exit(1);
 			}
 		}
-		UserInterface ui = UserInterface.fromLogReplay(delay, gui, dirName, firstGen, timeScale, 100, TimeUnit.MILLISECONDS);
+		long requestTime = DEFAULT_REQUEST_TIME;
+		if (args.length >= 7) {
+			try {
+				requestTime = Long.parseLong(args[6]);
+				if (requestTime <= 0) {
+					System.err.println("requestTime was not positive");
+				}
+			}
+			catch (NumberFormatException e) {
+				System.err.println("The value provided for requestTime was not a number");
+				System.exit(1);
+			}
+		}
+		UserInterface ui = UserInterface.fromLogReplay(delay, gui, dirName, firstGen, timeScale, requestTime, TimeUnit.NANOSECONDS);
 		ui.run();
 	}
 

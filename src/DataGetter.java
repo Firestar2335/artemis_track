@@ -21,6 +21,10 @@ public abstract class DataGetter implements Runnable {
 	/** The parent thread */
 	protected final Thread parent;
 
+	private boolean shouldQuit;
+
+	private boolean paused;
+
 
 	public DataGetter(BlockingQueue<ApiResponse> recv, Thread parent, long delayMilli, int delayNano) {
 		int k = Math.floorDiv(delayNano, 1_000_000);
@@ -40,6 +44,8 @@ public abstract class DataGetter implements Runnable {
 		}
 		snd = recv;
 		this.parent = parent;
+		shouldQuit = false;
+		paused = false;
 	}
 
 	public DataGetter(BlockingQueue<ApiResponse> recv, Thread parent, long delayMilli) {
@@ -53,6 +59,8 @@ public abstract class DataGetter implements Runnable {
 		delayNano = 0;
 		snd = recv;
 		this.parent = parent;
+		shouldQuit = false;
+		paused = false;
 	}
 
 	public DataGetter(BlockingQueue<ApiResponse> recv, Thread parent, long timeout, TimeUnit unit) {
@@ -83,6 +91,8 @@ public abstract class DataGetter implements Runnable {
 		}
 		snd = recv;
 		this.parent = parent;
+		shouldQuit = false;
+		paused = false;
 	}
 
 	/**
@@ -92,11 +102,66 @@ public abstract class DataGetter implements Runnable {
 	public abstract int getStatusCode();
 
 	/**
+	 * Returns the minimum generation accesible by this object
+	 * @return
+	 */
+	public abstract long getMinGeneration();
+
+	/**
+	 * Returns the maximum generation accessible by this object
+	 * @return
+	 */
+	public abstract long getMaxGeneration();
+
+	/**
+	 * Returns the current generation of this object
+	 * @return
+	 */
+	public abstract long getGeneration();
+
+	/**
+	 * Submits a request to obtain the telemetry for the given generation, if possible.
+	 * @param gen The timestamp of the telemetry file, in microseconds since the epoch.
+	 */
+	public abstract void requestGeneration(long gen);
+
+	public void quit() {
+		shouldQuit = true;
+	}
+
+	public boolean shouldQuit() {
+		return shouldQuit;
+	}
+
+	public boolean isPaused() {
+		return paused;
+	}
+
+	public void pause() {
+		paused = true;
+	}
+
+	public synchronized void unpause() {
+		paused = false;
+		notifyAll();
+	}
+
+	protected synchronized void pauseWait() {
+		while (isPaused() && !shouldQuit()) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+
+			}
+		}
+	}
+
+	/**
 	 * Logs the provided JSON document in the log directory with the provided generation
 	 * @param doc
 	 * @param generation
 	 */
-	public static void logJSON(JsonDocument doc, long generation) {
+	protected static void logJSON(JsonDocument doc, long generation) {
 		try{
 			File logFile = new File("./log/"+PREFIX+generation+SUFFIX);
 			if (!logFile.exists()){

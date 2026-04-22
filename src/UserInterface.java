@@ -117,7 +117,10 @@ public class UserInterface implements Runnable {
 							gui.updateCurrentTelemetry(elapsedTime,lastVectors, lastElements, lastAttitude);
 						}
 					}
-					else {
+					else if (gui == null) {
+						//if (gui != null) {
+						//	gui.updateTime();
+						//}
 						System.out.println("\nNo new data");
 					}
 
@@ -143,6 +146,9 @@ public class UserInterface implements Runnable {
 							elapsedTime = getDuration(lastData);
 						} catch (NoSuchElementException f) {
 							System.err.println("Invalid JSON telemetry received at generation "+lastData.genMicro);
+							if (gui != null) {
+								gui.updateTime();
+							}
 							next = null;
 						}
 					}
@@ -165,10 +171,38 @@ public class UserInterface implements Runnable {
 		}
 		finally {
 			System.out.println("Exiting...");
+			webRequests.quit();
 			requests.interrupt();
 			recv.clear();
 			in.close();
 		}
+	}
+
+	public long getMinGen() {
+		return webRequests.getMinGeneration();
+	}
+	public long getMaxGen() {
+		return webRequests.getMaxGeneration();
+	}
+
+	public long getGen() {
+		return webRequests.getGeneration();
+	}
+
+	public void requestGen(long gen) {
+		webRequests.requestGeneration(gen);
+	}
+
+	public void pause() {
+		webRequests.pause();
+	}
+
+	public void unpause() {
+		webRequests.unpause();
+	}
+
+	public boolean isPaused() {
+		return webRequests.isPaused();
 	}
 
 	private StateVector getVectors(ApiResponse data) {
